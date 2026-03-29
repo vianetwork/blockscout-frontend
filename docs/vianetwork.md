@@ -6,15 +6,15 @@ Current fork-specific additions include:
 - `via` rollup type support in the frontend
 - Via batch routes and homepage latest-batch integration
 - Via-specific API resource wiring for batch pages
-- Via-specific local environment preset at `configs/envs/.env.via`
+- Via-specific local environment preset at `configs/envs/.env.via_sepolia`
 - local script fallback for repositories without Git tags (`NEXT_PUBLIC_GIT_TAG=dev`)
 
 ## Local development
 
-The easiest way to run this fork locally against the Via testnet backend is:
+The easiest way to run this fork locally against the Via Sepolia backend is:
 
 ```sh
-cp configs/envs/.env.via .env.local
+cp configs/envs/.env.via_sepolia .env.local
 ```
 
 After copying, `.env.local` should already keep the local app settings as:
@@ -26,14 +26,15 @@ NEXT_PUBLIC_APP_PORT=3000
 NEXT_PUBLIC_APP_ENV=development
 ```
 
-The Via testnet backend settings should remain pointed at the hosted explorer API:
+The Via Sepolia backend settings should remain pointed at the hosted explorer API:
 
 ```env
 NEXT_PUBLIC_API_PROTOCOL=https
 NEXT_PUBLIC_API_HOST=testnet.blockscout.onvia.org
 NEXT_PUBLIC_API_BASE_PATH=/
 NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL=wss
-NEXT_PUBLIC_NETWORK_NAME=Via
+NEXT_PUBLIC_NETWORK_NAME=Via Sepolia
+NEXT_PUBLIC_NETWORK_RPC_URL=https://via.testnet.viablockchain.dev
 NEXT_PUBLIC_ROLLUP_TYPE=via
 ```
 
