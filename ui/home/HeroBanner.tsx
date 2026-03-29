@@ -11,13 +11,9 @@ import SearchBar from 'ui/snippets/searchBar/SearchBarDesktop';
 import SearchBarMobile from 'ui/snippets/searchBar/SearchBarMobile';
 import UserProfileDesktop from 'ui/snippets/user/UserProfileDesktop';
 
-export const BACKGROUND_DEFAULT_LIGHT = '#FFFFFF';
-export const BACKGROUND_DEFAULT_DARK = '#FFFFFF';
-export const BACKGROUND_DEFAULT = BACKGROUND_DEFAULT_LIGHT;
-const TEXT_COLOR_DEFAULT_LIGHT = 'black';
-const TEXT_COLOR_DEFAULT_DARK = 'black';
-const BORDER_DEFAULT_LIGHT = '1px solid var(--chakra-colors-blackAlpha-200)';
-const BORDER_DEFAULT_DARK = '1px solid var(--chakra-colors-blackAlpha-200)';
+export const BACKGROUND_DEFAULT = '#FFFFFF';
+const TEXT_COLOR_DEFAULT = 'black';
+const BORDER_DEFAULT = '1px solid var(--chakra-colors-blackAlpha-200)';
 
 const HeroBanner = () => {
 
@@ -26,30 +22,30 @@ const HeroBanner = () => {
   const background = {
     _light:
       config.UI.homepage.heroBanner?.background?.[0] ||
-      BACKGROUND_DEFAULT_LIGHT,
+      BACKGROUND_DEFAULT,
     _dark:
       config.UI.homepage.heroBanner?.background?.[1] ||
       config.UI.homepage.heroBanner?.background?.[0] ||
-      BACKGROUND_DEFAULT_DARK,
+      BACKGROUND_DEFAULT,
   };
 
   const textColor = {
     _light:
       // light mode
       config.UI.homepage.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT_LIGHT,
+      TEXT_COLOR_DEFAULT,
     // dark mode
     _dark:
       config.UI.homepage.heroBanner?.text_color?.[1] ||
       config.UI.homepage.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT_DARK,
+      TEXT_COLOR_DEFAULT,
   };
 
   const border = {
     _light:
-      config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT_LIGHT,
+      config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT,
     _dark:
-      config.UI.homepage.heroBanner?.border?.[1] || config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT_DARK,
+      config.UI.homepage.heroBanner?.border?.[1] || config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT,
   };
 
   return (
