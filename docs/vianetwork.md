@@ -14,11 +14,10 @@ Current fork-specific additions include:
 The easiest way to run this fork locally against the Via testnet backend is:
 
 ```sh
-cd /home/romano/github/vianetwork-repos/blockscout-frontend
 cp configs/envs/.env.via .env.local
 ```
 
-Make sure the final local app settings in `.env.local` are:
+After copying, `.env.local` should already keep the local app settings as:
 
 ```env
 NEXT_PUBLIC_APP_PROTOCOL=http
