@@ -1,6 +1,7 @@
 import { Box, Text } from '@chakra-ui/react';
 import React from 'react';
 
+import config from 'configs/app';
 import useApiQuery from 'lib/api/useApiQuery';
 import { generateListStub } from 'stubs/utils';
 import { ZKSYNC_L2_TXN_BATCHES_ITEM } from 'stubs/zkSyncL2';
@@ -13,11 +14,16 @@ import StickyPaginationWithText from 'ui/shared/StickyPaginationWithText';
 import ZkSyncTxnBatchesListItem from 'ui/txnBatches/zkSyncL2/ZkSyncTxnBatchesListItem';
 import ZkSyncTxnBatchesTable from 'ui/txnBatches/zkSyncL2/ZkSyncTxnBatchesTable';
 
+const rollupFeature = config.features.rollup;
+
 const ZkSyncL2TxnBatches = () => {
+  const batchResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'general:via_l2_txn_batches' : 'general:zksync_l2_txn_batches';
+  const batchCountResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'general:via_l2_txn_batches_count' : 'general:zksync_l2_txn_batches_count';
+
   const { data, isError, isPlaceholderData, pagination } = useQueryWithPages({
-    resourceName: 'general:zksync_l2_txn_batches',
+    resourceName: batchResourceName,
     options: {
-      placeholderData: generateListStub<'general:zksync_l2_txn_batches'>(
+      placeholderData: generateListStub<typeof batchResourceName>(
         ZKSYNC_L2_TXN_BATCHES_ITEM,
         50,
         {
@@ -30,7 +36,7 @@ const ZkSyncL2TxnBatches = () => {
     },
   });
 
-  const countersQuery = useApiQuery('general:zksync_l2_txn_batches_count', {
+  const countersQuery = useApiQuery(batchCountResourceName, {
     queryOptions: {
       placeholderData: 5231746,
     },
