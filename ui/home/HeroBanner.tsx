@@ -13,11 +13,14 @@ import UserProfileDesktop from 'ui/snippets/user/UserProfileDesktop';
 
 export const BACKGROUND_DEFAULT = '#FFFFFF';
 const TEXT_COLOR_DEFAULT = 'black';
+const TEXT_COLOR_LEGACY = 'white';
 const BORDER_DEFAULT = '1px solid var(--chakra-colors-blackAlpha-200)';
+const BORDER_LEGACY = 'none';
 
 const HeroBanner = () => {
 
   const isMobile = useIsMobile();
+  const hasCustomBackground = Boolean(config.UI.homepage.heroBanner?.background?.[0]);
 
   const background = {
     _light:
@@ -29,23 +32,26 @@ const HeroBanner = () => {
       BACKGROUND_DEFAULT,
   };
 
+  const textColorDefault = hasCustomBackground ? TEXT_COLOR_LEGACY : TEXT_COLOR_DEFAULT;
+  const borderDefault = hasCustomBackground ? BORDER_LEGACY : BORDER_DEFAULT;
+
   const textColor = {
     _light:
       // light mode
       config.UI.homepage.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT,
+      textColorDefault,
     // dark mode
     _dark:
       config.UI.homepage.heroBanner?.text_color?.[1] ||
       config.UI.homepage.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT,
+      textColorDefault,
   };
 
   const border = {
     _light:
-      config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT,
+      config.UI.homepage.heroBanner?.border?.[0] || borderDefault,
     _dark:
-      config.UI.homepage.heroBanner?.border?.[1] || config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT,
+      config.UI.homepage.heroBanner?.border?.[1] || config.UI.homepage.heroBanner?.border?.[0] || borderDefault,
   };
 
   return (

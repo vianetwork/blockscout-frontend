@@ -32,7 +32,7 @@ The Via Sepolia backend settings should remain pointed at the hosted explorer AP
 NEXT_PUBLIC_API_PROTOCOL=https
 NEXT_PUBLIC_API_HOST=testnet.blockscout.onvia.org
 NEXT_PUBLIC_API_BASE_PATH=/
-NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL=wss
+NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL=ws
 NEXT_PUBLIC_NETWORK_NAME=Via Sepolia
 NEXT_PUBLIC_NETWORK_RPC_URL=https://via.testnet.viablockchain.dev
 NEXT_PUBLIC_ROLLUP_TYPE=via
