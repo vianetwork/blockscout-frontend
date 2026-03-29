@@ -11,10 +11,13 @@ import SearchBar from 'ui/snippets/searchBar/SearchBarDesktop';
 import SearchBarMobile from 'ui/snippets/searchBar/SearchBarMobile';
 import UserProfileDesktop from 'ui/snippets/user/UserProfileDesktop';
 
-export const BACKGROUND_DEFAULT =
-  'radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%), var(--chakra-colors-blue-400)';
-const TEXT_COLOR_DEFAULT = 'white';
-const BORDER_DEFAULT = 'none';
+export const BACKGROUND_DEFAULT_LIGHT = '#FFFFFF';
+export const BACKGROUND_DEFAULT_DARK = '#FFFFFF';
+export const BACKGROUND_DEFAULT = BACKGROUND_DEFAULT_LIGHT;
+const TEXT_COLOR_DEFAULT_LIGHT = 'black';
+const TEXT_COLOR_DEFAULT_DARK = 'black';
+const BORDER_DEFAULT_LIGHT = '1px solid var(--chakra-colors-blackAlpha-200)';
+const BORDER_DEFAULT_DARK = '1px solid var(--chakra-colors-blackAlpha-200)';
 
 const HeroBanner = () => {
 
@@ -23,30 +26,30 @@ const HeroBanner = () => {
   const background = {
     _light:
       config.UI.homepage.heroBanner?.background?.[0] ||
-      BACKGROUND_DEFAULT,
+      BACKGROUND_DEFAULT_LIGHT,
     _dark:
       config.UI.homepage.heroBanner?.background?.[1] ||
       config.UI.homepage.heroBanner?.background?.[0] ||
-      BACKGROUND_DEFAULT,
+      BACKGROUND_DEFAULT_DARK,
   };
 
   const textColor = {
     _light:
       // light mode
       config.UI.homepage.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT,
+      TEXT_COLOR_DEFAULT_LIGHT,
     // dark mode
     _dark:
       config.UI.homepage.heroBanner?.text_color?.[1] ||
       config.UI.homepage.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT,
+      TEXT_COLOR_DEFAULT_DARK,
   };
 
   const border = {
     _light:
-      config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT,
+      config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT_LIGHT,
     _dark:
-      config.UI.homepage.heroBanner?.border?.[1] || config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT,
+      config.UI.homepage.heroBanner?.border?.[1] || config.UI.homepage.heroBanner?.border?.[0] || BORDER_DEFAULT_DARK,
   };
 
   return (
