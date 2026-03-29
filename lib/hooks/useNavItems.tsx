@@ -197,7 +197,7 @@ export default function useNavItems(): ReturnType {
           nameLookup,
         ].filter(Boolean),
       ];
-    } else if (rollupFeature.isEnabled && rollupFeature.type === 'zkSync') {
+    } else if (rollupFeature.isEnabled && (rollupFeature.type === 'zkSync' || rollupFeature.type === 'via')) {
       blockchainNavItems = [
         [
           txs,
