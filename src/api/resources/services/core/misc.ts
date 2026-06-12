@@ -109,6 +109,10 @@ export const CORE_API_MISC_RESOURCES = {
   homepage_zksync_latest_batch: {
     path: '/api/v2/main-page/zksync/batches/latest-number',
   },
+  // Via backend exposes the batch namespace through zkSync routes.
+  homepage_via_latest_batch: {
+    path: '/api/v2/main-page/zksync/batches/latest-number',
+  },
   homepage_arbitrum_latest_batch: {
     path: '/api/v2/main-page/arbitrum/batches/latest-number',
   },
@@ -294,6 +298,7 @@ R extends 'core:homepage_arbitrum_deposits' ? ArbitrumLatestDepositsResponse :
 R extends 'core:homepage_arbitrum_l2_batches' ? { items: Array<ArbitrumL2TxnBatchesItem> } :
 R extends 'core:homepage_indexing_status' ? IndexingStatus :
 R extends 'core:homepage_zksync_latest_batch' ? number :
+R extends 'core:homepage_via_latest_batch' ? number :
 R extends 'core:homepage_arbitrum_latest_batch' ? number :
 R extends 'core:quick_search' ? Array<SearchResultItem> :
 R extends 'core:search' ? SearchResult :

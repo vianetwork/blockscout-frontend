@@ -57,8 +57,12 @@ export interface TransactionZkSync {
   zksync?: Omit<ZkSyncBatchesItem, 'number' | 'transactions_count' | 'timestamp'> & {
     batch_number: number | null;
   };
+  via?: Omit<ZkSyncBatchesItem, 'number' | 'transactions_count' | 'timestamp'> & {
+    batch_number: number | null;
+  };
 }
 
 export interface BlockZkSync {
   zksync?: Omit<ZkSyncBatchesItem, 'number' | 'transactions_count' | 'timestamp'> & { batch_number: number | null };
+  via?: Omit<ZkSyncBatchesItem, 'number' | 'transactions_count' | 'timestamp'> & { batch_number: number | null };
 }

@@ -253,7 +253,7 @@ export const withdrawals: Guard = (chainConfig: typeof config) => async() => {
   }
 };
 
-const BATCH_ROLLUP_TYPES: Array<RollupType> = [ 'zkSync', 'arbitrum', 'optimistic', 'scroll' ];
+const BATCH_ROLLUP_TYPES: Array<RollupType> = [ 'zkSync', 'via', 'arbitrum', 'optimistic', 'scroll' ];
 export const batch: Guard = (chainConfig: typeof config) => async() => {
   const rollupFeature = chainConfig.features.rollup;
   if (!(rollupFeature.isEnabled && BATCH_ROLLUP_TYPES.includes(rollupFeature.type))) {

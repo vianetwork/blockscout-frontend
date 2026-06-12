@@ -15,6 +15,7 @@ import { TX } from 'src/slices/tx/stubs/tx';
 import TextAd from 'src/features/ads/text/components/TextAd';
 import { ZKSYNC_L2_TXN_BATCH } from 'src/features/rollup/zk-sync/stubs';
 
+import config from 'src/config';
 import throwOnAbsentParamError from 'src/shared/errors/throw-on-absent-param-error';
 import throwOnResourceLoadError from 'src/shared/errors/throw-on-resource-load-error';
 import useIsMobile from 'src/shared/hooks/useIsMobile';
@@ -34,14 +35,17 @@ const TAB_LIST_PROPS = {
 };
 
 const TABS_HEIGHT = 80;
+const rollupFeature = config.features.rollup;
 
 const ZkSyncL2TxnBatch = () => {
   const router = useRouter();
   const number = getQueryParamString(router.query.number);
   const tab = getQueryParamString(router.query.tab);
   const isMobile = useIsMobile();
+  const batchResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'core:via_l2_txn_batch' : 'core:zksync_l2_txn_batch';
+  const batchTxsResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'core:via_l2_txn_batch_txs' : 'core:zksync_l2_txn_batch_txs';
 
-  const batchQuery = useApiQuery('core:zksync_l2_txn_batch', {
+  const batchQuery = useApiQuery(batchResourceName, {
     pathParams: { number },
     queryOptions: {
       enabled: Boolean(number),
@@ -50,11 +54,11 @@ const ZkSyncL2TxnBatch = () => {
   });
 
   const batchTxsQuery = useQueryWithPages({
-    resourceName: 'core:zksync_l2_txn_batch_txs',
+    resourceName: batchTxsResourceName,
     pathParams: { number },
     options: {
       enabled: Boolean(!batchQuery.isPlaceholderData && batchQuery.data?.number && tab === 'txs'),
-      placeholderData: generateListStub<'core:zksync_l2_txn_batch_txs'>(TX, 50, { next_page_params: {
+      placeholderData: generateListStub<typeof batchTxsResourceName>(TX, 50, { next_page_params: {
         batch_number: '8122',
         block_number: 1338932,
         index: 0,

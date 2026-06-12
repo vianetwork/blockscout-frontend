@@ -98,6 +98,8 @@ const TxDetails = ({ data, isLoading, socketStatus, noTxActions }: Props) => {
     return null;
   }
 
+  const zkSyncLikeBatch = data.via ?? data.zksync;
+
   const addressFromTags = [
     ...data.from.private_tags || [],
     ...data.from.public_tags || [],
@@ -162,7 +164,7 @@ const TxDetails = ({ data, isLoading, socketStatus, noTxActions }: Props) => {
       >
         {
           rollupFeature.isEnabled &&
-          (rollupFeature.type === 'zkSync' || rollupFeature.type === 'arbitrum' || rollupFeature.type === 'scroll') ?
+          (rollupFeature.type === 'zkSync' || rollupFeature.type === 'via' || rollupFeature.type === 'arbitrum' || rollupFeature.type === 'scroll') ?
             `${ layerLabels.current } status and method` :
             'Status and method'
         }
@@ -239,18 +241,18 @@ const TxDetails = ({ data, isLoading, socketStatus, noTxActions }: Props) => {
         </>
       ) }
 
-      { data.zksync && !config.slices.tx.hiddenFields?.L1_status && (
+      { (data.zksync || data.via) && !config.slices.tx.hiddenFields?.L1_status && (
         <>
           <DetailedInfo.ItemLabel
-            hint="Status is the short interpretation of the batch lifecycle"
+            hint={ `Status of the transaction confirmation path to ${ layerLabels.parent }` }
             isLoading={ isLoading }
           >
-            { layerLabels.parent } status
+            Confirmation status
           </DetailedInfo.ItemLabel>
           <DetailedInfo.ItemValue>
             <VerificationSteps
               steps={ ZKSYNC_L2_TX_BATCH_STATUSES.map(formatZkSyncL2TxnBatchStatus) }
-              currentStep={ formatZkSyncL2TxnBatchStatus(data.zksync.status) }
+              currentStep={ formatZkSyncL2TxnBatchStatus((data.via || data.zksync)!.status) }
               isLoading={ isLoading }
             />
           </DetailedInfo.ItemValue>
@@ -288,7 +290,7 @@ const TxDetails = ({ data, isLoading, socketStatus, noTxActions }: Props) => {
         ) }
       </DetailedInfo.ItemValue>
 
-      { data.zksync && !config.slices.tx.hiddenFields?.batch && (
+      { zkSyncLikeBatch && !config.slices.tx.hiddenFields?.batch && (
         <>
           <DetailedInfo.ItemLabel
             hint="Batch number"
@@ -297,12 +299,14 @@ const TxDetails = ({ data, isLoading, socketStatus, noTxActions }: Props) => {
             Batch
           </DetailedInfo.ItemLabel>
           <DetailedInfo.ItemValue>
-            { data.zksync.batch_number ? (
+            { zkSyncLikeBatch.batch_number !== null ? (
               <BatchEntityL2
                 isLoading={ isLoading }
-                number={ data.zksync.batch_number }
+                number={ zkSyncLikeBatch.batch_number }
               />
-            ) : <Skeleton loading={ isLoading }>Pending</Skeleton> }
+            ) : (
+              <Skeleton loading={ isLoading }>Pending</Skeleton>
+            ) }
           </DetailedInfo.ItemValue>
         </>
       ) }
@@ -856,7 +860,7 @@ const TxDetails = ({ data, isLoading, socketStatus, noTxActions }: Props) => {
           </>
         ) }
 
-        { data.zksync && <ZkSyncL2TxnBatchHashesInfo data={ data.zksync } isLoading={ isLoading }/> }
+        { zkSyncLikeBatch && <ZkSyncL2TxnBatchHashesInfo data={ zkSyncLikeBatch } isLoading={ isLoading }/> }
       </CollapsibleDetails>
     </DetailedInfo.Container>
   );

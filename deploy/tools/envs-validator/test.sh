@@ -5,7 +5,7 @@ common_file="${test_folder}/.env.common"
 
 # Generate ENV registry file
 export NEXT_PUBLIC_GIT_COMMIT_SHA=$(git rev-parse --short HEAD)
-export NEXT_PUBLIC_GIT_TAG=$(git describe --tags --abbrev=0)
+export NEXT_PUBLIC_GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo dev)
 ../../scripts/collect_envs.sh ../../../docs/ENVS.md
 
 # Copy test assets

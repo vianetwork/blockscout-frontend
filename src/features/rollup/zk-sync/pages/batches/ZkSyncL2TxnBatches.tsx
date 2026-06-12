@@ -10,6 +10,7 @@ import PageTitle from 'src/shell/page/title/PageTitle';
 
 import { ZKSYNC_L2_TXN_BATCHES_ITEM } from 'src/features/rollup/zk-sync/stubs';
 
+import config from 'src/config';
 import DataList from 'src/shared/lists/DataList';
 import StickyPaginationWithText from 'src/shared/pagination/StickyPaginationWithText';
 import useQueryWithPages from 'src/shared/pagination/useQueryWithPages';
@@ -20,11 +21,16 @@ import { Skeleton } from 'src/toolkit/chakra/skeleton';
 import ZkSyncTxnBatchesListItem from './ZkSyncTxnBatchesListItem';
 import ZkSyncTxnBatchesTable from './ZkSyncTxnBatchesTable';
 
+const rollupFeature = config.features.rollup;
+
 const ZkSyncL2TxnBatches = () => {
+  const batchResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'core:via_l2_txn_batches' : 'core:zksync_l2_txn_batches';
+  const batchCountResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'core:via_l2_txn_batches_count' : 'core:zksync_l2_txn_batches_count';
+
   const { data, isError, isPlaceholderData, pagination } = useQueryWithPages({
-    resourceName: 'core:zksync_l2_txn_batches',
+    resourceName: batchResourceName,
     options: {
-      placeholderData: generateListStub<'core:zksync_l2_txn_batches'>(
+      placeholderData: generateListStub<typeof batchResourceName>(
         ZKSYNC_L2_TXN_BATCHES_ITEM,
         50,
         {
@@ -37,7 +43,7 @@ const ZkSyncL2TxnBatches = () => {
     },
   });
 
-  const countersQuery = useApiQuery('core:zksync_l2_txn_batches_count', {
+  const countersQuery = useApiQuery(batchCountResourceName, {
     queryOptions: {
       placeholderData: 5231746,
     },

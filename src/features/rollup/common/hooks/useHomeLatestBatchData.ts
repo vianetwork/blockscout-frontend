@@ -32,6 +32,13 @@ export default function useHomeLatestBatchData(): HomeLatestBatchQueryResult | u
     },
   });
 
+  const viaLatestBatchQuery = useApiQuery('core:homepage_via_latest_batch', {
+    queryOptions: {
+      placeholderData: 12345,
+      enabled: rollupFeature.isEnabled && rollupFeature.type === 'via' && shouldShowLatestBatchStat,
+    },
+  });
+
   const arbitrumLatestBatchQuery = useApiQuery('core:homepage_arbitrum_latest_batch', {
     queryOptions: {
       placeholderData: 12345,
@@ -47,6 +54,8 @@ export default function useHomeLatestBatchData(): HomeLatestBatchQueryResult | u
     switch (rollupFeature.type) {
       case 'zkSync':
         return [ zkSyncLatestBatchQuery, undefined ] as const;
+      case 'via':
+        return [ viaLatestBatchQuery, undefined ] as const;
       case 'arbitrum':
         return [
           arbitrumLatestBatchQuery,

@@ -216,6 +216,28 @@ export const CORE_API_ROLLUP_RESOURCES = {
     paginated: true,
   },
 
+  // Via backend exposes the batch namespace through zkSync routes while
+  // the frontend keeps `via` as the rollup type for Via-specific navigation and
+  // batch UI copy.
+  via_l2_txn_batches: {
+    path: '/api/v2/zksync/batches',
+    filterFields: [],
+    paginated: true,
+  },
+  via_l2_txn_batches_count: {
+    path: '/api/v2/zksync/batches/count',
+  },
+  via_l2_txn_batch: {
+    path: '/api/v2/zksync/batches/:number',
+    pathParams: [ 'number' as const ],
+  },
+  via_l2_txn_batch_txs: {
+    path: '/api/v2/transactions/zksync-batch/:number',
+    pathParams: [ 'number' as const ],
+    filterFields: [],
+    paginated: true,
+  },
+
   // SHIBARIUM
   shibarium_deposits: {
     path: '/api/v2/shibarium/deposits',
@@ -315,6 +337,10 @@ R extends 'core:zksync_l2_txn_batches' ? ZkSyncBatchesResponse :
 R extends 'core:zksync_l2_txn_batches_count' ? number :
 R extends 'core:zksync_l2_txn_batch' ? ZkSyncBatch :
 R extends 'core:zksync_l2_txn_batch_txs' ? ZkSyncBatchTxs :
+R extends 'core:via_l2_txn_batches' ? ZkSyncBatchesResponse :
+R extends 'core:via_l2_txn_batches_count' ? number :
+R extends 'core:via_l2_txn_batch' ? ZkSyncBatch :
+R extends 'core:via_l2_txn_batch_txs' ? ZkSyncBatchTxs :
 R extends 'core:scroll_l2_txn_batch_txs' ? ScrollL2TxnBatchTxs :
 R extends 'core:scroll_l2_txn_batch_blocks' ? ScrollL2TxnBatchBlocks :
 R extends 'core:scroll_l2_txn_batches' ? ScrollL2BatchesResponse :

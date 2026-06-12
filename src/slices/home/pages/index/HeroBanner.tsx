@@ -15,14 +15,16 @@ import RewardsButton from 'src/features/rewards/components/RewardsButton';
 import config from 'src/config';
 import useIsMobile from 'src/shared/hooks/useIsMobile';
 
-export const BACKGROUND_DEFAULT =
-  'radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%), var(--chakra-colors-blue-400)';
-const TEXT_COLOR_DEFAULT = 'white';
-const BORDER_DEFAULT = 'none';
+export const BACKGROUND_DEFAULT = '#FFFFFF';
+const TEXT_COLOR_DEFAULT = 'black';
+const TEXT_COLOR_LEGACY = 'white';
+const BORDER_DEFAULT = '1px solid var(--chakra-colors-blackAlpha-200)';
+const BORDER_LEGACY = 'none';
 
 const HeroBanner = () => {
 
   const isMobile = useIsMobile();
+  const hasCustomBackground = Boolean(config.slices.home.heroBanner?.background?.[0]);
 
   const background = {
     _light:
@@ -34,23 +36,26 @@ const HeroBanner = () => {
       BACKGROUND_DEFAULT,
   };
 
+  const textColorDefault = hasCustomBackground ? TEXT_COLOR_LEGACY : TEXT_COLOR_DEFAULT;
+  const borderDefault = hasCustomBackground ? BORDER_LEGACY : BORDER_DEFAULT;
+
   const textColor = {
     _light:
       // light mode
       config.slices.home.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT,
+      textColorDefault,
     // dark mode
     _dark:
       config.slices.home.heroBanner?.text_color?.[1] ||
       config.slices.home.heroBanner?.text_color?.[0] ||
-      TEXT_COLOR_DEFAULT,
+      textColorDefault,
   };
 
   const border = {
     _light:
-      config.slices.home.heroBanner?.border?.[0] || BORDER_DEFAULT,
+      config.slices.home.heroBanner?.border?.[0] || borderDefault,
     _dark:
-      config.slices.home.heroBanner?.border?.[1] || config.slices.home.heroBanner?.border?.[0] || BORDER_DEFAULT,
+      config.slices.home.heroBanner?.border?.[1] || config.slices.home.heroBanner?.border?.[0] || borderDefault,
   };
 
   const text = (() => {

@@ -5,6 +5,7 @@ export const ROLLUP_TYPES = [
   'arbitrum',
   'shibarium',
   'zkSync',
+  'via',
   'scroll',
 ] as const;
 

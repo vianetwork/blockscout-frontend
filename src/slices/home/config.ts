@@ -13,7 +13,7 @@ const homePageStats: Array<HomeStatsWidgetId> = (() => {
   if (!Array.isArray(parsedValue)) {
     const rollupFeature = rollup;
 
-    if (rollupFeature.isEnabled && [ 'zkSync', 'arbitrum' ].includes(rollupFeature.type)) {
+    if (rollupFeature.isEnabled && [ 'zkSync', 'via', 'arbitrum' ].includes(rollupFeature.type)) {
       return [ 'latest_batch', 'average_block_time', 'total_txs', 'wallet_addresses', 'gas_tracker' ];
     }
 

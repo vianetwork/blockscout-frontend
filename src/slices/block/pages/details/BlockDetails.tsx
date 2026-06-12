@@ -66,6 +66,8 @@ const BlockDetails = ({ query }: Props) => {
 
   const { data, isPlaceholderData } = query;
 
+  const zkSyncLikeBatch = data?.via ?? data?.zksync;
+
   const handlePrevNextClick = React.useCallback((direction: 'prev' | 'next') => {
     if (!data) {
       return;
@@ -286,7 +288,7 @@ const BlockDetails = ({ query }: Props) => {
         </>
       ) }
 
-      { rollupFeature.isEnabled && rollupFeature.type === 'zkSync' && data.zksync && !config.slices.block.hiddenFields?.batch && (
+      { rollupFeature.isEnabled && [ 'zkSync', 'via' ].includes(rollupFeature.type) && zkSyncLikeBatch && !config.slices.block.hiddenFields?.batch && (
         <>
           <DetailedInfo.ItemLabel
             hint="Batch number"
@@ -295,14 +297,14 @@ const BlockDetails = ({ query }: Props) => {
             Batch
           </DetailedInfo.ItemLabel>
           <DetailedInfo.ItemValue>
-            { data.zksync.batch_number ?
-              <BatchEntityL2 isLoading={ isPlaceholderData } number={ data.zksync.batch_number }/> :
+            { zkSyncLikeBatch.batch_number !== null ?
+              <BatchEntityL2 isLoading={ isPlaceholderData } number={ zkSyncLikeBatch.batch_number }/> :
               <Skeleton loading={ isPlaceholderData }>Pending</Skeleton> }
           </DetailedInfo.ItemValue>
         </>
       ) }
       { !config.slices.block.hiddenFields?.L1_status && rollupFeature.isEnabled &&
-        ((rollupFeature.type === 'zkSync' && data.zksync) || (rollupFeature.type === 'arbitrum' && data.arbitrum)) &&
+        ((([ 'zkSync', 'via' ].includes(rollupFeature.type)) && (data.zksync || data.via)) || (rollupFeature.type === 'arbitrum' && data.arbitrum)) &&
       (
         <>
           <DetailedInfo.ItemLabel
@@ -312,10 +314,10 @@ const BlockDetails = ({ query }: Props) => {
             Status
           </DetailedInfo.ItemLabel>
           <DetailedInfo.ItemValue>
-            { rollupFeature.type === 'zkSync' && data.zksync && (
+            { [ 'zkSync', 'via' ].includes(rollupFeature.type) && (data.zksync || data.via) && (
               <VerificationSteps
                 steps={ zkSyncVerificationSteps }
-                currentStep={ formatZkSyncL2TxnBatchStatus(data.zksync.status) }
+                currentStep={ formatZkSyncL2TxnBatchStatus((data.via || data.zksync)!.status) }
                 isLoading={ isPlaceholderData }
               />
             ) }
@@ -549,8 +551,8 @@ const BlockDetails = ({ query }: Props) => {
       <CollapsibleDetails loading={ isPlaceholderData } mt={ 6 } gridColumn={{ base: undefined, lg: '1 / 3' }}>
         <GridItem colSpan={{ base: undefined, lg: 2 }} mt={{ base: 1, lg: 4 }}/>
 
-        { rollupFeature.isEnabled && rollupFeature.type === 'zkSync' && data.zksync &&
-              <ZkSyncL2TxnBatchHashesInfo data={ data.zksync } isLoading={ isPlaceholderData }/> }
+        { rollupFeature.isEnabled && [ 'zkSync', 'via' ].includes(rollupFeature.type) && zkSyncLikeBatch &&
+              <ZkSyncL2TxnBatchHashesInfo data={ zkSyncLikeBatch } isLoading={ isPlaceholderData }/> }
 
         { !isPlaceholderData && <BlockDetailsBlobInfo data={ data }/> }
 

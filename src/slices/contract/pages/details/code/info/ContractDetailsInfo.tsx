@@ -144,7 +144,7 @@ const ContractDetailsInfo = ({ data, isLoading, addressData }: Props) => {
       ) }
       { data.optimization_runs !== null && !isStylusContract && (
         <ContractDetailsInfoItem
-          label={ rollupFeature.isEnabled && rollupFeature.type === 'zkSync' ? 'Optimization mode' : 'Optimization runs' }
+          label={ rollupFeature.isEnabled && [ 'zkSync', 'via' ].includes(rollupFeature.type) ? 'Optimization mode' : 'Optimization runs' }
           isLoading={ isLoading }
         >
           { String(data.optimization_runs) }

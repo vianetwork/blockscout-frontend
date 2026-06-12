@@ -6,6 +6,8 @@
     <span> blockchain explorer</span>
 </p>
 
+This fork contains Via Network-specific frontend support. For fork-specific notes and local development instructions, see [docs/vianetwork.md](./docs/vianetwork.md).
+
 ## Running and configuring the app
 
 App is distributed as a docker image. Here you can find information about the [package](https://github.com/blockscout/frontend/pkgs/container/frontend) and its recent [releases](https://github.com/blockscout/frontend/releases).
@@ -25,6 +27,7 @@ For more information on migrating from the previous frontend, please see the [fr
 See our [Contribution guide](./docs/CONTRIBUTING.md) for pull request protocol. We expect contributors to follow our [code of conduct](./CODE_OF_CONDUCT.md) when submitting code or comments.
 
 ## Resources
+- [Via Network fork notes](./docs/vianetwork.md)
 - [App ENVs list](./docs/ENVS.md)
 - [Contribution guide](./docs/CONTRIBUTING.md)
 - [Making a custom build](./docs/CUSTOM_BUILD.md)
