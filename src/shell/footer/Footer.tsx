@@ -26,6 +26,7 @@ import { Link } from 'src/toolkit/chakra/link';
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
 import { copy } from 'src/toolkit/utils/htmlEntities';
 
+import FooterCookieSettings from './FooterCookieSettings';
 import FooterLinkItem from './FooterLinkItem';
 import { getApiVersionUrl } from './get-api-version-url';
 
@@ -43,7 +44,7 @@ const Footer = () => {
       refetchOnMount: false,
     },
   });
-  const apiVersionUrl = getApiVersionUrl(backendVersionData?.backend_version);
+  const apiVersionUrl = getApiVersionUrl(backendVersionData?.backend_version ?? undefined);
 
   const BLOCKSCOUT_LINKS = [
     {
@@ -150,7 +151,7 @@ const Footer = () => {
           </Link>
         </Flex>
         <Text mt={ 3 } fontSize="xs">
-          Blockscout is a tool for inspecting and analyzing EVM based blockchains. Blockchain explorer for Ethereum Networks.
+          Scan, inspect, and analyze EVM based blockchains with Blockscout, a blockchain explorer for Ethereum networks.
         </Text>
         <VStack mt={ 6 } alignItems="start" textStyle="xs" gap={ 1 }>
           <Flex flexDir={ onionDomain ? 'row' : 'column' } _empty={{ display: 'none' }} columnGap={ 6 } rowGap={ 1 }>
@@ -210,6 +211,14 @@ const Footer = () => {
     );
   };
 
+  const renderCookieSettings = (gridArea?: GridProps['gridArea']) => {
+    if (!config.services.usercentrics) {
+      return <Box gridArea={ gridArea }/>;
+    }
+
+    return <FooterCookieSettings gridArea={ gridArea }/>;
+  };
+
   if (config.shell.footer.links) {
     return (
       <Box { ...containerProps }>
@@ -218,6 +227,7 @@ const Footer = () => {
             { renderNetworkInfo() }
             { renderProjectInfo() }
             { renderRecaptcha() }
+            { renderCookieSettings() }
           </div>
 
           <Grid
@@ -260,6 +270,7 @@ const Footer = () => {
           "network links-top"
           "info links-bottom"
           "recaptcha links-bottom"
+          "cookie-settings links-bottom"
         `,
         }}
       >
@@ -267,6 +278,7 @@ const Footer = () => {
         { renderNetworkInfo({ lg: 'network' }) }
         { renderProjectInfo({ lg: 'info' }) }
         { renderRecaptcha({ lg: 'recaptcha' }) }
+        { renderCookieSettings({ lg: 'cookie-settings' }) }
 
         <Grid
           gridArea={{ lg: 'links-bottom' }}

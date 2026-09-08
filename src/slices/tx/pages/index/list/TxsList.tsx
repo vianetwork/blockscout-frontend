@@ -3,7 +3,7 @@
 import { Box } from '@chakra-ui/react';
 import React from 'react';
 
-import type { Transaction } from 'src/slices/tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 import type { TxsSocketType } from 'src/slices/tx/types/socket';
 
 import { useMultichainContext } from 'src/features/multichain/context';
@@ -21,12 +21,13 @@ interface Props {
   enableTimeIncrement?: boolean;
   currentAddress?: string;
   isLoading: boolean;
-  items: Array<Transaction>;
+  items: Array<schemas['Transaction']>;
   translationQuery?: TxsTranslationQuery;
+  resetKey?: string;
 }
 
 const TxsList = (props: Props) => {
-  const { cutRef, renderedItemsNum } = useLazyRenderedList(props.items, !props.isLoading);
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: props.items, isEnabled: !props.isLoading, resetKey: props.resetKey });
   const initialList = useInitialList({
     data: props.items ?? [],
     idFn: (item) => item.hash,

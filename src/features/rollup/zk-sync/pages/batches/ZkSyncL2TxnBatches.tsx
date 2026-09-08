@@ -18,7 +18,7 @@ import { generateListStub } from 'src/shared/pagination/utils';
 
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
 
-import ZkSyncTxnBatchesListItem from './ZkSyncTxnBatchesListItem';
+import ZkSyncTxnBatchesList from './ZkSyncTxnBatchesList';
 import ZkSyncTxnBatchesTable from './ZkSyncTxnBatchesTable';
 
 const rollupFeature = config.features.rollup;
@@ -27,7 +27,7 @@ const ZkSyncL2TxnBatches = () => {
   const batchResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'core:via_l2_txn_batches' : 'core:zksync_l2_txn_batches';
   const batchCountResourceName = rollupFeature.isEnabled && rollupFeature.type === 'via' ? 'core:via_l2_txn_batches_count' : 'core:zksync_l2_txn_batches_count';
 
-  const { data, isError, isPlaceholderData, pagination } = useQueryWithPages({
+  const { data, isError, isPlaceholderData, pagination, queryHash } = useQueryWithPages({
     resourceName: batchResourceName,
     options: {
       placeholderData: generateListStub<typeof batchResourceName>(
@@ -52,16 +52,15 @@ const ZkSyncL2TxnBatches = () => {
   const content = data?.items ? (
     <>
       <Box hideFrom="lg">
-        { data.items.map(((item, index) => (
-          <ZkSyncTxnBatchesListItem
-            key={ item.number + (isPlaceholderData ? String(index) : '') }
-            item={ item }
-            isLoading={ isPlaceholderData }
-          />
-        ))) }
+        <ZkSyncTxnBatchesList items={ data.items } isLoading={ isPlaceholderData } resetKey={ queryHash }/>
       </Box>
       <Box hideBelow="lg">
-        <ZkSyncTxnBatchesTable items={ data.items } top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 } isLoading={ isPlaceholderData }/>
+        <ZkSyncTxnBatchesTable
+          items={ data.items }
+          top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 }
+          isLoading={ isPlaceholderData }
+          resetKey={ queryHash }
+        />
       </Box>
     </>
   ) : null;

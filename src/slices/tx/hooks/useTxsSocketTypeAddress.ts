@@ -4,9 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import React from 'react';
 
+import type { operations, schemas } from '@blockscout/api-types';
 import type { SocketMessage } from 'src/api/socket/types';
-import type { AddressFromToFilter, AddressTransactionsResponse } from 'src/slices/address/types/api';
-import type { Transaction, TransactionsSortingValue } from 'src/slices/tx/types/api';
+import type { AddressFromToFilter } from 'src/slices/address/types/api';
+import type { TransactionsSortingValue } from 'src/slices/tx/types/api';
 
 import { getResourceKey } from 'src/api/hooks/useApiQuery';
 import useSocketChannel from 'src/api/socket/useSocketChannel';
@@ -21,7 +22,7 @@ import getSortValueFromQuery from 'src/shared/sort/get-sort-value-from-query';
 import { sortTxsFromSocket } from '../utils/sort-txs';
 import { SORT_OPTIONS } from './useTxsSort';
 
-const matchFilter = (filterValue: AddressFromToFilter, transaction: Transaction, address?: string) => {
+const matchFilter = (filterValue: AddressFromToFilter, transaction: schemas['Transaction'], address?: string) => {
   if (!filterValue) {
     return true;
   }
@@ -64,19 +65,21 @@ export default function useTxsSocketTypeAddress({ isLoading }: Params) {
 
     queryClient.setQueryData(
       queryKey,
-      (prevData: AddressTransactionsResponse | undefined) => {
+      (prevData: operations['AddressController.transactions']['json'] | undefined) => {
         if (!prevData) {
           return;
         }
 
-        const newItems: Array<Transaction> = [];
+        const newItems: Array<schemas['Transaction']> = [];
         let newCount = 0;
+        let hasUpdatedItems = false;
 
         payload.transactions.forEach(tx => {
           const currIndex = prevData.items.findIndex((item) => item.hash === tx.hash);
 
           if (currIndex > -1) {
             prevData.items[currIndex] = tx;
+            hasUpdatedItems = true;
           } else {
             const isMatch = matchFilter(filterValue as AddressFromToFilter, tx, currentAddress);
             if (isMatch) {
@@ -91,6 +94,13 @@ export default function useTxsSocketTypeAddress({ isLoading }: Params) {
 
         if (newCount > 0) {
           setNum(prev => prev + newCount);
+        }
+
+        // Nothing changed in the visible list — the incoming items only bumped the "new items"
+        // count above the header (list already past the overload threshold). Keep the previous
+        // data reference so the memoized list doesn't re-render on every socket message.
+        if (newItems.length === 0 && !hasUpdatedItems) {
+          return prevData;
         }
 
         return {

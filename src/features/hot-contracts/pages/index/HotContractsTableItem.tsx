@@ -4,7 +4,7 @@ import { HStack } from '@chakra-ui/react';
 import { BigNumber } from 'bignumber.js';
 import React from 'react';
 
-import type { HotContract } from 'src/features/hot-contracts/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import { Reputation } from 'src/slices/token/components/entity/TokenEntity';
@@ -14,11 +14,11 @@ import MetadataTags from 'src/features/address-metadata/components/tag/MetadataT
 import NativeCoinValue from 'src/shared/values/entity/NativeCoinValue';
 
 import { TableCell, TableRow } from 'src/toolkit/chakra/table';
-import { TruncatedText } from 'src/toolkit/components/truncation/TruncatedText';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
 interface Props {
   isLoading?: boolean;
-  data: HotContract;
+  data: schemas['HotContract'];
   exchangeRate: string | null;
 };
 
@@ -49,10 +49,10 @@ const HotContractsTableItem = ({
         ) }
       </TableCell>
       <TableCell isNumeric>
-        <TruncatedText text={ Number(data.transactions_count).toLocaleString() } loading={ isLoading } maxW="100%"/>
+        <Truncate value={ Number(data.transactions_count).toLocaleString() } type="end" loading={ isLoading } maxW="100%"/>
       </TableCell>
       <TableCell isNumeric>
-        <TruncatedText text={ BigNumber(data.total_gas_used || 0).toFormat() } loading={ isLoading } maxW="100%"/>
+        <Truncate value={ BigNumber(data.total_gas_used || 0).toFormat() } type="end" loading={ isLoading } maxW="100%"/>
       </TableCell>
       <TableCell isNumeric>
         <NativeCoinValue

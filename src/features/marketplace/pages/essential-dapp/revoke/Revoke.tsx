@@ -4,10 +4,12 @@ import { Flex, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { isAddress } from 'viem';
+import type { PublicClient } from 'viem';
 import { mainnet } from 'viem/chains';
 import { getEnsAddress, normalize } from 'viem/ens';
-import { useAccount } from 'wagmi';
+import { useAccount, usePublicClient } from 'wagmi';
 
+import Web3Boundary from 'src/features/connect-wallet/components/Web3Boundary';
 import useWeb3Wallet from 'src/features/connect-wallet/hooks/useWallet';
 import essentialDappsChainsConfig from 'src/features/marketplace/chains-config/essential-dapps';
 
@@ -20,6 +22,7 @@ import { useQueryParams } from 'src/shared/router/useQueryParams';
 import { Button } from 'src/toolkit/chakra/button';
 import { EmptyState } from 'src/toolkit/chakra/empty-state';
 import { Tooltip } from 'src/toolkit/chakra/tooltip';
+import { ContentLoader } from 'src/toolkit/components/loaders/ContentLoader';
 
 import AddressEntity from './components/AddressEntity';
 import ChainSelect from './components/ChainSelect';
@@ -28,7 +31,6 @@ import SearchInput from './components/SearchInput';
 import StartScreen from './components/StartScreen';
 import useApprovalsQuery from './hooks/useApprovalsQuery';
 import useCoinBalanceQuery from './hooks/useCoinBalanceQuery';
-import createPublicClient from './lib/createPublicClient';
 
 const feature = config.features.marketplace;
 const dappConfig = feature.isEnabled ? feature.essentialDapps?.revoke : undefined;
@@ -39,7 +41,7 @@ const defaultChainId = (
     dappConfig?.chains[0]
 ) as string;
 
-const Revoke = () => {
+const RevokeContent = () => {
   const router = useRouter();
   const { updateQuery } = useQueryParams();
   const chainIdFromQuery: string | undefined = getQueryParamString(router.query.chainId);
@@ -48,10 +50,11 @@ const Revoke = () => {
   const { address: connectedAddress } = useAccount();
   const [ searchAddress, setSearchAddress ] = useState(addressFromQuery || '');
   const [ searchInputValue, setSearchInputValue ] = useState('');
+  const [ approvalsPage, setApprovalsPage ] = useState(1);
 
   const selectedChain = essentialDappsChainsConfig()?.chains.find((chain) => chain.id === selectedChainId[0]);
 
-  const approvalsQuery = useApprovalsQuery(selectedChain, searchAddress);
+  const approvalsQuery = useApprovalsQuery(selectedChain, searchAddress, approvalsPage);
   const coinBalanceQuery = useCoinBalanceQuery(selectedChain, searchAddress);
   const web3Wallet = useWeb3Wallet({ source: 'Essential dapps' });
   const isMobile = useIsMobile();
@@ -66,13 +69,11 @@ const Revoke = () => {
     [ searchAddress, connectedAddress ],
   );
 
-  const publicClient = useMemo(
-    () => createPublicClient(String(mainnet.id)),
-    [],
-  );
+  const publicClient = usePublicClient({ chainId: mainnet.id }) as PublicClient | undefined;
 
   const handleChainValueChange = useCallback(({ value }: { value: Array<string> }) => {
     setSelectedChainId(value);
+    setApprovalsPage(1);
     mixpanel.logEvent(mixpanel.EventTypes.PAGE_WIDGET, {
       Type: 'Chain switch',
       Info: value[0],
@@ -94,6 +95,7 @@ const Revoke = () => {
     }
     setSearchAddress(address);
     setSearchInputValue('');
+    setApprovalsPage(1);
     if (isAddress(address.toLowerCase())) {
       updateQuery({ address }, true);
     }
@@ -122,6 +124,8 @@ const Revoke = () => {
         isAddressMatch={ isAddressMatch }
         coinBalanceQuery={ coinBalanceQuery }
         approvalsQuery={ approvalsQuery }
+        approvalsPage={ approvalsPage }
+        setApprovalsPage={ setApprovalsPage }
       />
     ) : (
       <EmptyState
@@ -225,5 +229,14 @@ const Revoke = () => {
     </Flex>
   );
 };
+
+// Revoke reads the connected account and issues approvals reads/writes through wagmi hooks, so it renders
+// inside a wallet island. The essential-dapp page calls `ensureLoaded()` at mount, so the runtime is
+// already loading when this renders; the fallback reuses the shared content loader until it is ready.
+const Revoke = () => (
+  <Web3Boundary fallback={ <ContentLoader/> }>
+    <RevokeContent/>
+  </Web3Boundary>
+);
 
 export default Revoke;

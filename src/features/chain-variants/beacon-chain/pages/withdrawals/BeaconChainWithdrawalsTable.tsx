@@ -2,9 +2,7 @@
 
 import React from 'react';
 
-import type { WithdrawalsItem } from 'src/features/chain-variants/beacon-chain/types/api';
-import type { AddressWithdrawalsItem } from 'src/slices/address/types/api';
-import type { BlockWithdrawalsItem } from 'src/slices/block/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { AddressHighlightProvider } from 'src/slices/address/contexts/address-highlight';
 
@@ -18,22 +16,16 @@ import BeaconChainWithdrawalsTableItem from './BeaconChainWithdrawalsTableItem';
 
 const feature = config.features.beaconChain;
 
-type Props = {
+interface Props {
   top: number;
   isLoading?: boolean;
-} & ({
-  items: Array<WithdrawalsItem>;
-  view: 'list';
-} | {
-  items: Array<AddressWithdrawalsItem>;
-  view: 'address';
-} | {
-  items: Array<BlockWithdrawalsItem>;
-  view: 'block';
-});
+  items: Array<schemas['BeaconWithdrawal']>;
+  view: 'address' | 'block' | 'list';
+  resetKey?: string;
+};
 
-const BeaconChainWithdrawalsTable = ({ items, isLoading, top, view }: Props) => {
-  const { cutRef, renderedItemsNum } = useLazyRenderedList(items, !isLoading);
+const BeaconChainWithdrawalsTable = ({ items, isLoading, top, view, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
 
   if (!feature.isEnabled) {
     return null;
@@ -53,14 +45,8 @@ const BeaconChainWithdrawalsTable = ({ items, isLoading, top, view }: Props) => 
           </TableRow>
         </TableHeaderSticky>
         <TableBody>
-          { view === 'list' && (items as Array<WithdrawalsItem>).slice(0, renderedItemsNum).map((item, index) => (
-            <BeaconChainWithdrawalsTableItem key={ item.index + (isLoading ? String(index) : '') } item={ item } view="list" isLoading={ isLoading }/>
-          )) }
-          { view === 'address' && (items as Array<AddressWithdrawalsItem>).slice(0, renderedItemsNum).map((item, index) => (
-            <BeaconChainWithdrawalsTableItem key={ item.index + (isLoading ? String(index) : '') } item={ item } view="address" isLoading={ isLoading }/>
-          )) }
-          { view === 'block' && (items as Array<BlockWithdrawalsItem>).slice(0, renderedItemsNum).map((item, index) => (
-            <BeaconChainWithdrawalsTableItem key={ item.index + (isLoading ? String(index) : '') } item={ item } view="block" isLoading={ isLoading }/>
+          { items.slice(0, renderedItemsNum).map((item, index) => (
+            <BeaconChainWithdrawalsTableItem key={ item.index + (isLoading ? String(index) : '') } item={ item } view={ view } isLoading={ isLoading }/>
           )) }
           <TableRow ref={ cutRef }/>
         </TableBody>

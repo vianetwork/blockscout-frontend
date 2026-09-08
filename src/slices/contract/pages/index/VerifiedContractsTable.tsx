@@ -2,7 +2,8 @@
 
 import React from 'react';
 
-import type { VerifiedContract, VerifiedContractsSortingField, VerifiedContractsSortingValue } from 'src/slices/contract/types/api';
+import type { schemas } from '@blockscout/api-types';
+import type { VerifiedContractsSortingField, VerifiedContractsSortingValue } from 'src/slices/contract/types/api';
 
 import { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
 
@@ -12,6 +13,7 @@ import { SORT_SEQUENCE } from 'src/slices/contract/pages/index/sort';
 import { useMultichainContext } from 'src/features/multichain/context';
 
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 import getNextSortValue from 'src/shared/sort/get-next-sort-value';
 
 import { TableBody, TableColumnHeader, TableColumnHeaderSortable, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
@@ -19,15 +21,17 @@ import { TableBody, TableColumnHeader, TableColumnHeaderSortable, TableHeaderSti
 import VerifiedContractsTableItem from './VerifiedContractsTableItem';
 
 interface Props {
-  data: Array<VerifiedContract>;
+  data: Array<schemas['SmartContractListItem']>;
   sort: VerifiedContractsSortingValue;
   setSorting: ({ value }: { value: Array<string> }) => void;
   isLoading?: boolean;
+  resetKey?: string;
 }
 
-const VerifiedContractsTable = ({ data, sort, setSorting, isLoading }: Props) => {
+const VerifiedContractsTable = ({ data, sort, setSorting, isLoading, resetKey }: Props) => {
   const multichainContext = useMultichainContext();
   const chainData = multichainContext?.chain;
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: data, isEnabled: !isLoading, resetKey });
 
   const onSortToggle = React.useCallback((field: VerifiedContractsSortingField) => {
     const value = getNextSortValue<VerifiedContractsSortingField, VerifiedContractsSortingValue>(SORT_SEQUENCE, field)(sort);
@@ -70,14 +74,15 @@ const VerifiedContractsTable = ({ data, sort, setSorting, isLoading }: Props) =>
         </TableRow>
       </TableHeaderSticky>
       <TableBody>
-        { data.map((item, index) => (
+        { data.slice(0, renderedItemsNum).map((item, index) => (
           <VerifiedContractsTableItem
-            key={ item.address.hash + (isLoading ? index : '') }
+            key={ `${ item.address?.hash ?? '' }${ isLoading ? index : '' }` }
             data={ item }
             isLoading={ isLoading }
             chainData={ chainData }
           />
         )) }
+        <TableRow ref={ cutRef }/>
       </TableBody>
     </TableRoot>
   );

@@ -3,7 +3,7 @@
 import { Box } from '@chakra-ui/react';
 import React from 'react';
 
-import type { InternalTransaction } from 'src/slices/internal-tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import ActionBar, { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
 
@@ -30,7 +30,7 @@ const SORT_SEQUENCE: Record<SortField, Array<Sort>> = {
 
 const getNextSortValue = (getNextSortValueShared<SortField, Sort>).bind(undefined, SORT_SEQUENCE);
 
-const sortFn = (sort: Sort) => (a: InternalTransaction, b: InternalTransaction) => {
+const sortFn = (sort: Sort) => (a: schemas['InternalTransaction'], b: schemas['InternalTransaction']) => {
   switch (sort) {
     case 'value-desc': {
       return compareBns(b.value, a.value);
@@ -41,11 +41,11 @@ const sortFn = (sort: Sort) => (a: InternalTransaction, b: InternalTransaction) 
     }
 
     case 'gas-limit-desc': {
-      return compareBns(b.gas_limit, a.gas_limit);
+      return compareBns(b.gas_limit || '0', a.gas_limit || '0');
     }
 
     case 'gas-limit-asc': {
-      return compareBns(a.gas_limit, b.gas_limit);
+      return compareBns(a.gas_limit || '0', b.gas_limit || '0');
 
     }
 
@@ -70,12 +70,12 @@ const TxInternals = ({ txQuery }: Props) => {
   // const [ filters, setFilters ] = React.useState<Array<TxInternalsType>>([]);
   // const [ searchTerm, setSearchTerm ] = React.useState<string>('');
   const [ sort, setSort ] = React.useState<Sort>('default');
-  const { data, isPlaceholderData, isError, pagination } = useQueryWithPages({
+  const { data, isPlaceholderData, isError, pagination, queryHash } = useQueryWithPages({
     resourceName: 'core:tx_internal_txs',
     pathParams: { hash: txQuery.data?.hash },
     options: {
       enabled: !txQuery.isPlaceholderData && Boolean(txQuery.data?.hash) && Boolean(txQuery.data?.status),
-      placeholderData: generateListStub<'core:tx_internal_txs'>(INTERNAL_TX, 3, { next_page_params: null }),
+      placeholderData: generateListStub<'core:tx_internal_txs'>(INTERNAL_TX, 3, { next_page_params: null, meta: { message: null, status: 1 } }),
     },
   });
 
@@ -103,7 +103,7 @@ const TxInternals = ({ txQuery }: Props) => {
 
   const content = filteredData ? (
     <>
-      <Box hideFrom="lg"><TxInternalsList data={ filteredData } isLoading={ isPlaceholderData }/></Box>
+      <Box hideFrom="lg"><TxInternalsList data={ filteredData } isLoading={ isPlaceholderData } resetKey={ queryHash }/></Box>
       <Box hideBelow="lg">
         <TxInternalsTable
           data={ filteredData }
@@ -111,6 +111,7 @@ const TxInternals = ({ txQuery }: Props) => {
           onSortToggle={ handleSortToggle }
           top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 }
           isLoading={ isPlaceholderData }
+          resetKey={ queryHash }
         />
       </Box>
     </>

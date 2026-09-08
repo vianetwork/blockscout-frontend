@@ -5,9 +5,9 @@ import React from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { Abi } from 'viem';
-import { useSwitchChain, useWaitForTransactionReceipt, useWalletClient } from 'wagmi';
+import { useSwitchChain, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 
-import type { OptimisticL2WithdrawalClaimInfo } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import useWeb3Wallet from 'src/features/connect-wallet/hooks/useWallet';
 
@@ -53,7 +53,7 @@ interface FormFields {
 }
 
 interface Props {
-  data: OptimisticL2WithdrawalClaimInfo;
+  data: Omit<schemas['OptimismTransactionWithdrawal'], 'nonce'>;
   onOpenChange: ({ open }: { open: boolean }) => void;
   proofSubmitterAddress?: string;
   onSuccess: (txHash: string) => void;
@@ -65,7 +65,7 @@ const OptimisticL2ClaimModal = ({ data, onOpenChange, proofSubmitterAddress, onS
 
   const { connect: connectWeb3Wallet, isConnected: isWeb3WalletConnected, isOpen: isWeb3WalletOpen } = useWeb3Wallet({ source: 'Smart contracts' });
   const { switchChainAsync } = useSwitchChain();
-  const { data: walletClient } = useWalletClient({ chainId: parentChain?.id ? Number(parentChain.id) : undefined });
+  const { writeContractAsync } = useWriteContract();
 
   const { status: txStatus, error: txError, isLoading: isTxPending } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -95,11 +95,9 @@ const OptimisticL2ClaimModal = ({ data, onOpenChange, proofSubmitterAddress, onS
         throw new Error('Feature is not enabled');
       }
 
-      await switchChainAsync({ chainId: Number(parentChain.id) });
+      const chainId = Number(parentChain.id);
 
-      if (!walletClient) {
-        throw new Error('Wallet Client is not defined');
-      }
+      await switchChainAsync({ chainId });
 
       if (
         data.portal_contract_address_hash === null ||
@@ -125,11 +123,12 @@ const OptimisticL2ClaimModal = ({ data, onOpenChange, proofSubmitterAddress, onS
         formData.address,
       ];
 
-      const hash = await walletClient.writeContract({
+      const hash = await writeContractAsync({
         args,
         abi: [ FINALIZE_WITHDRAWAL_ABI ] as Abi,
         functionName: FINALIZE_WITHDRAWAL_ABI.name,
         address: data.portal_contract_address_hash as `0x${ string }`,
+        chainId,
       });
 
       setTxHash(hash);
@@ -137,7 +136,7 @@ const OptimisticL2ClaimModal = ({ data, onOpenChange, proofSubmitterAddress, onS
     } catch (error) {
       showErrorToast(error);
     }
-  }, [ walletClient, switchChainAsync, data, showErrorToast ]);
+  }, [ writeContractAsync, switchChainAsync, data, showErrorToast ]);
 
   React.useEffect(() => {
     if (!txHash) {

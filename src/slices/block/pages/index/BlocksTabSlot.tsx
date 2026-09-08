@@ -7,10 +7,8 @@ import React from 'react';
 
 import type { PaginationParams } from 'src/shared/pagination/types';
 
-import useApiQuery from 'src/api/hooks/useApiQuery';
-
 import getChainUtilizationParams from 'src/slices/chain/get-chain-utilization-params';
-import { HOMEPAGE_STATS } from 'src/slices/home/stubs';
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 
 import Pagination from 'src/shared/pagination/Pagination';
 import SpriteIcon from 'src/sprite/SpriteIcon';
@@ -25,17 +23,13 @@ interface Props {
 }
 
 const BlocksTabSlot = ({ pagination }: Props) => {
-  const statsQuery = useApiQuery('core:stats', {
-    queryOptions: {
-      placeholderData: HOMEPAGE_STATS,
-    },
-  });
+  const statsQuery = useStatsQuery();
 
   const networkUtilization = getChainUtilizationParams(statsQuery.data?.network_utilization_percentage ?? 0);
 
   return (
     <Flex alignItems="center" columnGap={ 8 } display={{ base: 'none', lg: 'flex' }}>
-      { statsQuery.data?.network_utilization_percentage !== undefined && (
+      { typeof statsQuery.data?.network_utilization_percentage === 'number' && (
         <Box>
           <Text as="span" fontSize="sm">
             Network utilization (last 50 blocks):{ nbsp }

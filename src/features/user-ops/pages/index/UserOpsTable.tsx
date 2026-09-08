@@ -2,35 +2,41 @@
 
 import React from 'react';
 
-import type { UserOpsItem } from 'src/features/user-ops/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { AddressHighlightProvider } from 'src/slices/address/contexts/address-highlight';
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 
 import { useMultichainContext } from 'src/features/multichain/context';
 
 import config from 'src/config';
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
 import UserOpsTableItem from './UserOpsTableItem';
 
 type Props = {
-  items: Array<UserOpsItem>;
+  items: Array<schemas['UserOperationInList']>;
   isLoading?: boolean;
   top: number;
   showTx: boolean;
   showSender: boolean;
+  resetKey?: string;
 };
 
-const UserOpsTable = ({ items, isLoading, top, showTx, showSender }: Props) => {
+const UserOpsTable = ({ items, isLoading, top, showTx, showSender, resetKey }: Props) => {
   const multichainContext = useMultichainContext();
   const chainData = multichainContext?.chain;
   const chainConfig = (multichainContext?.chain.app_config || config);
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
+
+  const statsQuery = useStatsQuery({ enabled: !isLoading });
 
   return (
     <AddressHighlightProvider>
-      <TableRoot minW="1000px">
+      <TableRoot minW="1050px">
         <TableHeaderSticky top={ top }>
           <TableRow>
             { chainData && <TableColumnHeader width="38px"></TableColumnHeader> }
@@ -48,7 +54,7 @@ const UserOpsTable = ({ items, isLoading, top, showTx, showSender }: Props) => {
           </TableRow>
         </TableHeaderSticky>
         <TableBody>
-          { items.map((item, index) => {
+          { items.slice(0, renderedItemsNum).map((item, index) => {
             return (
               <UserOpsTableItem
                 key={ item.hash + (isLoading ? String(index) : '') }
@@ -57,9 +63,11 @@ const UserOpsTable = ({ items, isLoading, top, showTx, showSender }: Props) => {
                 showSender={ showSender }
                 showTx={ showTx }
                 chainData={ chainData }
+                exchangeRate={ statsQuery.isPlaceholderData ? undefined : statsQuery.data?.coin_price ?? undefined }
               />
             );
           }) }
+          <TableRow ref={ cutRef }/>
         </TableBody>
       </TableRoot>
     </AddressHighlightProvider>

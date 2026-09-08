@@ -2,8 +2,8 @@
 
 import React from 'react';
 
+import type { schemas } from '@blockscout/api-types';
 import type { PaginationParams } from 'src/shared/pagination/types';
-import type { AddressTokenBalance } from 'src/slices/address/types/api';
 import type { TokenType } from 'src/slices/token/types/api';
 
 import ActionBar, { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
@@ -20,16 +20,17 @@ import AddressFungibleTokensFilter from './AddressFungibleTokensFilter';
 import AddressFungibleTokensTable from './AddressFungibleTokensTable';
 
 type Props = {
-  items: Array<Pick<AddressTokenBalance, 'token' | 'value'>> | undefined;
+  items: Array<Pick<schemas['TokenBalance'], 'token' | 'value'>> | undefined;
   isLoading: boolean;
   pagination: PaginationParams;
   isError: boolean;
   top?: number;
   tokenTypes: Array<TokenType>;
   onTokenTypesChange: (value: Array<TokenType>) => void;
+  resetKey?: string;
 };
 
-const AddressFungibleTokens = ({ items, isLoading, pagination, isError, top, tokenTypes, onTokenTypesChange }: Props) => {
+const AddressFungibleTokens = ({ items, isLoading, pagination, isError, top, tokenTypes, onTokenTypesChange, resetKey }: Props) => {
   const isMobile = useIsMobile();
 
   const hasAdditionalTokenTypes = config.slices.token.additionalTypes.length > 0;
@@ -47,7 +48,8 @@ const AddressFungibleTokens = ({ items, isLoading, pagination, isError, top, tok
         data={ items }
         top={ top ?? (pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0) }
         isLoading={ isLoading }
-        hasAdditionalTokenTypes={ hasAdditionalTokenTypes }/>
+        hasAdditionalTokenTypes={ hasAdditionalTokenTypes }
+        resetKey={ resetKey }/>
     </TableContainerScrollable>
   ) : null;
 

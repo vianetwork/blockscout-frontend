@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import type { OptimisticL2WithdrawalClaimInfo } from 'src/features/rollup/optimism/types/api';
-import type { AddressParam } from 'src/slices/address/types/api';
+import type { schemas } from '@blockscout/api-types';
 
+import Web3Boundary from 'src/features/connect-wallet/components/Web3Boundary';
 import { parentChain } from 'src/features/connect-wallet/utils/chains';
 import OptimisticL2ClaimModal from 'src/features/rollup/optimism/components/OptimisticL2ClaimModal';
 
@@ -14,9 +14,11 @@ import { Button } from 'src/toolkit/chakra/button';
 import { Link } from 'src/toolkit/chakra/link';
 import { useDisclosure } from 'src/toolkit/hooks/useDisclosure';
 
+import WithdrawalClaimButton from '../../common/components/WithdrawalClaimButton';
+
 const rollupFeature = config.features.rollup;
 
-export const canClaimDirectlyGuard = (data: OptimisticL2WithdrawalClaimInfo) => {
+export const canClaimDirectlyGuard = (data: Omit<schemas['OptimismTransactionWithdrawal'], 'nonce'>) => {
   return (
     config.features.connectWallet.isEnabled &&
     Boolean(parentChain) &&
@@ -31,8 +33,8 @@ export const canClaimDirectlyGuard = (data: OptimisticL2WithdrawalClaimInfo) => 
 };
 
 interface Props {
-  data: OptimisticL2WithdrawalClaimInfo;
-  from: AddressParam | null;
+  data: Omit<schemas['OptimismTransactionWithdrawal'], 'nonce'>;
+  from: schemas['Address'] | null;
   onSuccess: (txHash: string) => void;
   source: 'list' | 'tx';
 }
@@ -45,14 +47,23 @@ const OptimisticL2ClaimButton = ({ data, from, onSuccess, source }: Props) => {
     return (
       <>
         { modal.open && (
-          <OptimisticL2ClaimModal
-            data={ data }
-            onOpenChange={ modal.onOpenChange }
-            proofSubmitterAddress={ from?.hash }
-            onSuccess={ onSuccess }
-          />
+          // The modal reads the wallet via wagmi hooks; the island loads the runtime lazily and provides
+          // the config. It only mounts on user intent (Claim clicked), by which point the runtime is
+          // typically already loaded, so no fallback is needed before the dialog appears.
+          <Web3Boundary>
+            <OptimisticL2ClaimModal
+              data={ data }
+              onOpenChange={ modal.onOpenChange }
+              proofSubmitterAddress={ from?.hash }
+              onSuccess={ onSuccess }
+            />
+          </Web3Boundary>
         ) }
-        <Button variant="outline" size="sm" onClick={ modal.onOpen }>Claim</Button>
+        <WithdrawalClaimButton
+          onClick={ modal.onOpen }
+        >
+          Claim
+        </WithdrawalClaimButton>
       </>
     );
   }

@@ -2,9 +2,9 @@ import React from 'react';
 
 import type { AddressMetadataInfo, AddressMetadataTagApi } from 'src/features/address-metadata/types/api';
 
-import * as addressMock from 'src/slices/address/mocks/address';
+import * as addressParamMock from 'src/slices/address/mocks/address-param';
 import type { TxQuery } from 'src/slices/tx/hooks/useTxQuery';
-import * as txMock from 'src/slices/tx/mocks/tx';
+import * as txMock from 'src/slices/tx/mocks/details';
 
 import { protocolTagWithMeta } from 'src/features/address-metadata/mocks/tags';
 import { txInterpretation } from 'src/features/tx-interpretation/blockscout/mocks';
@@ -117,7 +117,7 @@ test.describe('blockscout provider', () => {
   });
 
   test('no interpretation, has method called', async({ render, mockApiResponse, mockAssetResponse }) => {
-    const newTxQuery = { ...txQuery, data: txMock.withRecipientContract } as TxQuery;
+    const newTxQuery = { ...txQuery, data: { ...txMock.withRecipientContract, status: 'error' } } as TxQuery;
     const metadataResponse = generateAddressMetadataResponse(protocolTagWithMeta);
     await mockApiResponse('metadata:info', metadataResponse, { queryParams: addressMetadataQueryParams });
     await mockAssetResponse(protocolTagWithMeta?.meta?.appLogoURL as string, './playwright/mocks/image_s.jpg');
@@ -132,7 +132,7 @@ test.describe('blockscout provider', () => {
     await mockApiResponse('metadata:info', metadataResponse, { queryParams: addressMetadataQueryParams });
     await mockAssetResponse(protocolTagWithMeta?.meta?.appLogoURL as string, './playwright/mocks/image_s.jpg');
 
-    const newTxQuery = { ...txQuery, data: { ...txMock.pending, to: addressMock.contract } } as TxQuery;
+    const newTxQuery = { ...txQuery, data: { ...txMock.pending, to: addressParamMock.contract } } as TxQuery;
     const component = await render(<TxSubHeading hash={ hash } hasTag={ false } txQuery={ newTxQuery }/>);
     await expect(component).toHaveScreenshot();
   });

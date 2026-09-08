@@ -3,7 +3,7 @@
 import { Box, Flex, Spinner } from '@chakra-ui/react';
 import React from 'react';
 
-import type { Transaction } from 'src/slices/tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import useApiQuery from 'src/api/hooks/useApiQuery';
 
@@ -13,17 +13,17 @@ import config from 'src/config';
 import * as DetailedInfo from 'src/shared/detailed-info/DetailedInfo';
 import useIsMobile from 'src/shared/hooks/useIsMobile';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
-import HashStringShortenDynamic from 'src/shared/texts/HashStringShortenDynamic';
 import TextSeparator from 'src/shared/texts/TextSeparator';
 
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
 const externalTxFeature = config.features.externalTxs;
 
 interface Props {
   hash: string;
   isLoading: boolean;
-  status: Transaction['status'];
+  status: schemas['Transaction']['status'];
 }
 
 const TxHash = ({ hash, isLoading, status }: Props) => {
@@ -51,7 +51,7 @@ const TxHash = ({ hash, isLoading, status }: Props) => {
         <Flex flexWrap="nowrap" alignItems="center" overflow="hidden">
           { status === null && <Spinner mr={ 2 } size="sm" flexShrink={ 0 }/> }
           <Skeleton loading={ isLoading } overflow="hidden">
-            <HashStringShortenDynamic hash={ hash }/>
+            <Truncate value={ hash }/>
           </Skeleton>
           <CopyToClipboard text={ hash } isLoading={ isLoading }/>
           { config.features.metasuites.isEnabled && (

@@ -5,23 +5,23 @@ import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import type { Chain, GetBlockReturnType } from 'viem';
 
-import type { Block } from 'src/slices/block/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import useApiQuery from 'src/api/hooks/useApiQuery';
 import { retry } from 'src/api/hooks/useQueryClientConfig';
 import type { ResourceError } from 'src/api/resources';
 
-import { BLOCK } from 'src/slices/block/stubs/block';
+import { BLOCK } from 'src/slices/block/stubs/details';
 import { GET_BLOCK } from 'src/slices/block/stubs/rpc';
-import formatRpcData from 'src/slices/block/utils/format-rpc-data';
+import { formatBlockDetailsData } from 'src/slices/block/utils/format-rpc-data';
 
-import { publicClient } from 'src/features/connect-wallet/utils/public-client';
+import { getPublicClient, isPublicClientAvailable } from 'src/features/connect-wallet/utils/public-client';
 
 import { SECOND } from 'src/toolkit/utils/consts';
 
 type RpcResponseType = GetBlockReturnType<Chain, false, 'latest'> | null;
 
-export type BlockQuery = UseQueryResult<Block, ResourceError<{ status: number }>> & {
+export type BlockQuery = UseQueryResult<schemas['BlockResponse'], ResourceError<{ status: number }>> & {
   isDegradedData: boolean;
   isFutureBlock: boolean;
 };
@@ -55,17 +55,19 @@ export default function useBlockQuery({ heightOrHash }: Params): BlockQuery {
   const latestBlockQuery = useQuery({
     queryKey: [ 'RPC', 'block', 'latest' ],
     queryFn: async() => {
+      const publicClient = await getPublicClient();
       if (!publicClient) {
         return null;
       }
       return publicClient.getBlock({ blockTag: 'latest' });
     },
-    enabled: publicClient !== undefined && (apiQuery.isError || apiQuery.errorUpdateCount > 0),
+    enabled: isPublicClientAvailable && (apiQuery.isError || apiQuery.errorUpdateCount > 0),
   });
 
-  const rpcQuery = useQuery<RpcResponseType, unknown, Block | null>({
+  const rpcQuery = useQuery<RpcResponseType, unknown, schemas['BlockResponse'] | null>({
     queryKey: [ 'RPC', 'block', { heightOrHash } ],
     queryFn: async() => {
+      const publicClient = await getPublicClient();
       if (!publicClient) {
         return null;
       }
@@ -74,7 +76,7 @@ export default function useBlockQuery({ heightOrHash }: Params): BlockQuery {
       return publicClient.getBlock(blockParams).catch(() => null);
     },
     select: (block) => {
-      return formatRpcData(block);
+      return formatBlockDetailsData(block);
     },
     placeholderData: GET_BLOCK,
     enabled: !latestBlockQuery.isPending,
@@ -83,7 +85,7 @@ export default function useBlockQuery({ heightOrHash }: Params): BlockQuery {
   });
 
   React.useEffect(() => {
-    if (apiQuery.isPlaceholderData || !publicClient) {
+    if (apiQuery.isPlaceholderData || !isPublicClientAvailable) {
       return;
     }
 
@@ -100,8 +102,8 @@ export default function useBlockQuery({ heightOrHash }: Params): BlockQuery {
     }
   }, [ rpcQuery.data, rpcQuery.isPlaceholderData ]);
 
-  const isRpcQuery = Boolean(publicClient && (apiQuery.isError || apiQuery.isPlaceholderData) && apiQuery.errorUpdateCount > 0 && rpcQuery.data);
-  const query = isRpcQuery ? rpcQuery as UseQueryResult<Block, ResourceError<{ status: number }>> : apiQuery;
+  const isRpcQuery = Boolean(isPublicClientAvailable && (apiQuery.isError || apiQuery.isPlaceholderData) && apiQuery.errorUpdateCount > 0 && rpcQuery.data);
+  const query = isRpcQuery ? rpcQuery as UseQueryResult<schemas['BlockResponse'], ResourceError<{ status: number }>> : apiQuery;
 
   return {
     ...query,

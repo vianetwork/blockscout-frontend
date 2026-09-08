@@ -6,15 +6,13 @@ import React from 'react';
 
 import type { HotContractsInterval, HotContractsSorting, HotContractsSortingField, HotContractsSortingValue } from 'src/features/hot-contracts/types/api';
 
-import useApiQuery from 'src/api/hooks/useApiQuery';
-
 import ActionBar from 'src/shell/page/action-bar/ActionBar';
 import PageTitle from 'src/shell/page/title/PageTitle';
 
-import { HOMEPAGE_STATS } from 'src/slices/home/stubs';
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 
 import HotContractsIntervalSelect from 'src/features/hot-contracts/pages/index/HotContractsIntervalSelect';
-import HotContractsListItem from 'src/features/hot-contracts/pages/index/HotContractsListItem';
+import HotContractsList from 'src/features/hot-contracts/pages/index/HotContractsList';
 import HotContractsTable from 'src/features/hot-contracts/pages/index/HotContractsTable';
 import { HOT_CONTRACTS } from 'src/features/hot-contracts/stubs';
 import { getIntervalValueFromQuery, SORT_OPTIONS } from 'src/features/hot-contracts/utils';
@@ -38,7 +36,7 @@ const HotContracts = () => {
   const [ sort, setSort ] =
       React.useState<HotContractsSortingValue>(getSortValueFromQuery<HotContractsSortingValue>(router.query, SORT_OPTIONS) ?? 'default');
 
-  const { data, isError, isPlaceholderData, pagination, onSortingChange, onFilterChange } = useQueryWithPages({
+  const { data, isError, isPlaceholderData, pagination, onSortingChange, onFilterChange, queryHash } = useQueryWithPages({
     resourceName: 'core:stats_hot_contracts',
     filters: { scale: interval },
     sorting: getSortParamsFromValue<HotContractsSortingValue, HotContractsSortingField, HotContractsSorting['order']>(sort),
@@ -50,12 +48,9 @@ const HotContracts = () => {
     },
   });
 
-  const statsQuery = useApiQuery('core:stats', {
-    queryOptions: {
-      placeholderData: HOMEPAGE_STATS,
-      refetchOnMount: false,
-    },
-  });
+  const statsQuery = useStatsQuery();
+
+  const isLoading = isPlaceholderData || statsQuery.isPlaceholderData;
 
   const handleSortChange = React.useCallback(({ value }: { value: Array<string> }) => {
     setSort(value[0] as HotContractsSortingValue);
@@ -67,29 +62,28 @@ const HotContracts = () => {
     onFilterChange({ scale: newInterval });
   }, [ onFilterChange ]);
 
-  const content = (
+  const content = data?.items ? (
     <>
       <Box hideFrom="lg">
-        { data?.items.map((item, index) => (
-          <HotContractsListItem
-            key={ item.contract_address.hash + (isPlaceholderData ? index : '') }
-            isLoading={ isPlaceholderData }
-            data={ item }
-            exchangeRate={ statsQuery.data?.coin_price ?? null }
-          />
-        )) }
+        <HotContractsList
+          items={ data.items }
+          isLoading={ isLoading }
+          exchangeRate={ statsQuery.data?.coin_price ?? null }
+          resetKey={ queryHash }
+        />
       </Box>
       <Box hideBelow="lg">
         <HotContractsTable
-          items={ data?.items }
-          isLoading={ isPlaceholderData }
+          items={ data.items }
+          isLoading={ isLoading }
           sort={ sort }
           setSorting={ handleSortChange }
           exchangeRate={ statsQuery.data?.coin_price ?? null }
+          resetKey={ queryHash }
         />
       </Box>
     </>
-  );
+  ) : null;
 
   const actionBar = (
     <ActionBar mt={ -6 }>
@@ -97,10 +91,10 @@ const HotContracts = () => {
         <HotContractsIntervalSelect
           interval={ interval }
           onIntervalChange={ handleIntervalChange }
-          isLoading={ isPlaceholderData }
+          isLoading={ isLoading }
         />
         { [ '1d', '7d', '30d' ].includes(interval) && (
-          <Skeleton loading={ isPlaceholderData } color="text.secondary" hideBelow="lg" textStyle="sm" ml={ 6 }>
+          <Skeleton loading={ isLoading } color="text.secondary" hideBelow="lg" textStyle="sm" ml={ 6 }>
             <span>The data is updated once a day.</span>
           </Skeleton>
         ) }
@@ -109,7 +103,7 @@ const HotContracts = () => {
           defaultValue={ [ sort ] }
           collection={ sortCollection }
           onValueChange={ handleSortChange }
-          isLoading={ isPlaceholderData }
+          isLoading={ isLoading }
           hideFrom="lg"
           ml={ 2 }
         />

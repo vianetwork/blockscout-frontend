@@ -19,6 +19,8 @@ import { fileURLToPath } from 'node:url';
 
 import tseslint from 'typescript-eslint';
 
+import { strykerDisableRule } from './tools/mutation-testing/eslint/well-formed-disable.mjs';
+
 const SPDX_HEADER = '// SPDX-License-Identifier: LicenseRef-Blockscout';
 
 const spdxLicenseRule = {
@@ -66,7 +68,8 @@ const RESTRICTED_MODULES = {
         'Select', 'SelectRoot', 'SelectControl', 'SelectContent', 'SelectItem', 'SelectValueText',
         'Heading', 'Badge', 'Tabs', 'Show', 'Hide', 'Checkbox', 'CheckboxGroup',
         'Table', 'TableRoot', 'TableBody', 'TableHeader', 'TableRow', 'TableCell',
-        'Menu', 'MenuRoot', 'MenuTrigger', 'MenuContent', 'MenuItem', 'MenuTriggerItem', 'MenuRadioItemGroup', 'MenuContextTrigger',
+        'Menu', 'MenuRoot', 'MenuTrigger', 'MenuContent', 'MenuItem', 'MenuTriggerItem', 'MenuCheckboxItem', 'MenuRadioItem', 'MenuRadioItemGroup',
+        'MenuContextTrigger',
         'Rating', 'RatingGroup', 'Textarea', 'Progress', 'ProgressCircle',
         'EmptyState',
       ],
@@ -98,13 +101,16 @@ const ARCH_BOUNDARY_ELEMENTS = [
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
 
-  { files: [ '**/*.{js,mjs,cjs,ts,jsx,tsx}', '**/*.pw.tsx' ] },
+  { files: [ '**/*.{js,mjs,cjs,ts,mts,jsx,tsx}', '**/*.pw.tsx' ] },
 
   { ignores: [
     'deploy/tools/',
     'public/',
     '.git/',
+    // agent worktrees are full checkouts of the repo; linting them doubles the work and can exhaust the heap
+    '.claude/worktrees/',
     'next.config.js',
+    'tools/code-complexity/dist/',
   ] },
 
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
@@ -236,6 +242,7 @@ export default tseslint.config(
         },
       } ],
       'react/jsx-equals-spacing': [ 'error', 'never' ],
+      'react/jsx-filename-extension': [ 'error', { allow: 'as-needed', extensions: [ '.tsx' ] } ],
       'react/jsx-fragments': [ 'error', 'syntax' ],
       'react/jsx-no-duplicate-props': 'error',
       'react/jsx-no-target-blank': 'off',
@@ -522,7 +529,17 @@ export default tseslint.config(
       'one-var': [ 'error', 'never' ],
       'prefer-const': 'error',
 
-      // restricted imports and properties
+      // restricted imports, properties and syntax
+      'no-restricted-syntax': [ 'error',
+        {
+          selector: 'CallExpression[callee.property.name=\'localeCompare\']',
+          message: 'Use the shared collator from src/shared/texts/collator.ts (collator.compare) instead of String.prototype.localeCompare.',
+        },
+        {
+          selector: 'NewExpression[callee.object.name=\'Intl\'][callee.property.name=\'Collator\']',
+          message: 'Use the shared collator from src/shared/texts/collator.ts instead of constructing Intl.Collator inline.',
+        },
+      ],
       'no-restricted-imports': [ 'error', RESTRICTED_MODULES ],
       'no-restricted-properties': [ 2, {
         object: 'process',
@@ -581,6 +598,14 @@ export default tseslint.config(
     ],
     rules: {
       'spdx-license/header': 'error',
+    },
+  },
+
+  {
+    plugins: { stryker: { rules: { 'well-formed-disable': strykerDisableRule } } },
+    files: [ '**/*.{ts,tsx,mjs,js,cjs}' ],
+    rules: {
+      'stryker/well-formed-disable': 'error',
     },
   },
 );

@@ -104,6 +104,7 @@ All json-like values should be single-quoted. If it contains a hash (`#`) or a d
   - [Mixpanel](#mixpanel)
   - [OpenTelemetry](#opentelemetry)
   - [Rollbar](#rollbar)
+  - [Usercentrics CMP](#usercentrics-cmp)
 - [Misc](#misc)
   - [Design system](#design-system)
   - [Pro API support](#pro-api-support)
@@ -240,7 +241,7 @@ Chain statistics and charts.
 | --- | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_STATS_API_HOST | `string` | Stats API endpoint url | Required | - | `https://stats.services.blockscout.com` | v1.0.x+ |
 | NEXT_PUBLIC_STATS_API_BASE_PATH | `string` | Base path for Stats API endpoint url | - | - | `/poa/core` | v1.29.0+ |
-| NEXT_PUBLIC_STATS_API_REFETCH_INTERVAL | `Record<StatsApiResourceName, number>` | Map that holds information about time in milliseconds that the resources should be continuously refetched; possible values for `StatsApiResourceName` are: `stats:counters`, `stats:pages_main` | - | - | `{'stats:pages_main': 10000}` | upcoming |
+| NEXT_PUBLIC_STATS_API_REFETCH_INTERVAL | `Record<StatsApiResourceName, number>` | Map that holds information about time in milliseconds that the resources should be continuously refetched; possible values for `StatsApiResourceName` are: `stats:counters`, `stats:pages_main` | - | - | `{'stats:pages_main': 10000}` | v2.9.0+ |
 
 &nbsp;
 
@@ -337,10 +338,10 @@ Meta tags, Open Graph, and SEO.
 | Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
 | --- | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_PROMOTE_BLOCKSCOUT_IN_TITLE | `boolean` | Set to `true` to promote Blockscout in meta and OG titles | - | `true` | `true` | v1.12.0+ |
-| NEXT_PUBLIC_OG_DESCRIPTION | `string` | Custom OG description | - | - | `Open-source block explorer by Blockscout. Search transactions, verify smart contracts, analyze addresses, and track network activity. Complete blockchain data and APIs for the %network_title% network.` | v1.12.0+ |
+| NEXT_PUBLIC_OG_DESCRIPTION | `string` | Custom OG description | - | - | `Open-source block explorer by Blockscout. Search transactions, verify smart contracts, analyze addresses, and track network activity. Complete blockchain data and APIs.` | v1.12.0+ |
 | NEXT_PUBLIC_OG_IMAGE_URL | `string` | OG image url. Minimum image size is 200 x 20 pixels (recommended: 1200 x 600); maximum supported file size is 8 MB; 2:1 aspect ratio; supported formats: image/jpeg, image/gif, image/png | - | `static/og_placeholder.png` | `https://placekitten.com/1200/600` | v1.12.0+ |
-| NEXT_PUBLIC_OG_ENHANCED_DATA_ENABLED | `boolean` | Set to `true` to populate OG tags (title, description) with API data for social preview robot requests | - | `false` | `true` | v1.29.0+ |
-| NEXT_PUBLIC_SEO_ENHANCED_DATA_ENABLED | `boolean` | Set to `true` to pre-render page titles (e.g Token page) on the server side and inject page h1-tag to the markup before it is sent to the browser. | - | `false` | `true` | v1.30.0+ |
+| NEXT_PUBLIC_OG_ENHANCED_DATA_ENABLED | `boolean` | Set to `true` to populate OG tags (title, description) with API data for social preview robot requests | - | `true` | `false` | v1.29.0+ |
+| NEXT_PUBLIC_SEO_ENHANCED_DATA_ENABLED | `boolean` | Set to `true` to pre-render page titles (e.g Token page) on the server side. | - | `false` | `true` | v1.30.0+ |
 
 &nbsp;
 
@@ -381,7 +382,8 @@ Meta tags, Open Graph, and SEO.
 | NEXT_PUBLIC_FEATURED_NETWORKS | `string` | URL of configuration file (`.json` format only) or file content string representation. It contains list of featured networks that will be shown in the network menu. See [below](#featured-network-configuration-properties) list of available properties for particular network | - | - | `https://example.com/featured_networks_config.json` \| `[{'title':'Astar(EVM)','url':'https://astar.blockscout.com/','group':'Mainnets','icon':'https://example.com/astar.svg'}]` | v1.0.x+ |
 | NEXT_PUBLIC_FEATURED_NETWORKS_ALL_LINK | `string` | Link to the all chains resource. Will be displayed at the bottom of featured networks list. | Works only if NEXT_PUBLIC_FEATURED_NETWORKS is set | - | `https://example.com` | v2.3.0+ |
 | NEXT_PUBLIC_FEATURED_NETWORKS_MODE | `tabs \| list` | Indicates how the networks are presented: in one list or in separate tabs. | Works only if NEXT_PUBLIC_FEATURED_NETWORKS is set | `list` | `tabs` | v2.5.0+ |
-| NEXT_PUBLIC_COLOR_THEME_DEFAULT | `'light' \| 'dim' \| 'midnight' \| 'dark'` | Preferred color theme of the app | - | - | `midnight` | v1.30.0+ |
+| NEXT_PUBLIC_COLOR_THEMES | `Array<'light' \| 'dim' \| 'midnight' \| 'dark'>` | Color themes the app offers in the settings menu. | - | all themes | `['light', 'dark']` | upcoming |
+| NEXT_PUBLIC_COLOR_THEME_DEFAULT | `'light' \| 'dim' \| 'midnight' \| 'dark'` | Preferred color theme of the app. Must be one of the themes listed in NEXT_PUBLIC_COLOR_THEMES, if that variable is set. | - | none, unless the themes offered by NEXT_PUBLIC_COLOR_THEMES cannot cover both light and dark `prefers-color-scheme`, in which case the last (darkest) one of them | `midnight` | v1.30.0+ |
 | NEXT_PUBLIC_COLOR_THEME_OVERRIDES | `string` | Color overrides for the default theme; pass a JSON-like string that represents a subset of the `DEFAULT_THEME_COLORS` object (see `toolkit/theme/foundations/colors.ts`) to customize the app's main colors. See [here](https://www.figma.com/design/4In0X8UADoZaTfZ34HaZ3K/Blockscout-design-system?node-id=29124-23813&t=XOv4ahHUSsTDlNkN-4) the Figma worksheet with description of available color tokens. | - | - | `{'text':{'primary':{'_light':{'value':'rgba(16,17,18,0.80)'},'_dark':{'value':'rgba(222,217,217)'}}}}` | v2.3.0+ |
 
 #### Featured network configuration properties
@@ -506,7 +508,7 @@ _Note_ Here, some values are arrays of up to two strings. The first string repre
 | background | `[string, string]` | Banner background (could be a solid color, gradient or picture). The string should be a valid `background` CSS property value. | - | `['radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%), var(--chakra-colors-blue-400)']` | `['lightpink','no-repeat bottom 20% right 0px/100% url(https://placekitten/1400/200)']` |
 | text_color | `[string, string]` | Banner text background. The string should be a valid `color` CSS property value. | - | `['white']` | `['lightpink','#DCFE76']` |
 | border | `[string, string]` | Banner border. The string should be a valid `border` CSS property value. | - | - | `['1px solid yellow','4px dashed #DCFE76']` |
-| search | `{ border_width: [string, string] }` | Search bar customization. Currently supports only width of the border (in px). | - | - | `{ 'border_width': ['0px', '2px'] }` |
+| search | `{ background?: [string, string]; border_width?: [string, string]; border_color?: Partial<Record<'_empty' \| '_hover' \| '_focus' \| '_filled', [string, string]>> }` | Search bar customization. `background` sets the input background color (valid `background-color` CSS value). `border_width` sets the border width (in px). `border_color` sets the border color per state: `_empty` (no value), `_hover`, `_focus`, `_filled` (has value). Each value should be a valid `border-color` CSS value. | - | - | `{ 'background': ['white', '#1A202C'], 'border_width': ['2px', '2px'], 'border_color': { '_empty': ['#CBD5E0'], '_hover': ['#4299E1'], '_focus': ['#3182CE'], '_filled': ['#A0AEC0'] } }` |
 | button | `Partial<Record<'_default' \| '_hover' \| '_selected', {'background'?: [string, string]; 'text_color?:[string, string]'}>>` | The button on the banner. It has three possible states: `_default`, `_hover`, and `_selected`. The `_selected` state reflects when the user is logged in or their wallet is connected to the app. | - | - | `{'_default':{'background':['deeppink'],'text_color':['white']}}` |
 
 #### Highlights banner configuration properties
@@ -604,8 +606,8 @@ _Note_ Some properties can hold an array of up to two strings. The first string 
 | NEXT_PUBLIC_IS_ACCOUNT_SUPPORTED | `boolean` | Set to true if network has account feature | Required | - | `true` | v1.0.x+ |
 | NEXT_PUBLIC_ACCOUNT_AUTH_PROVIDER | `auth0 \| dynamic` | Auth provider that enables basic user authentication. | - | `auth0` | `dynamic` | v2.7.0+ |
 | NEXT_PUBLIC_ACCOUNT_DYNAMIC_ENVIRONMENT_ID | `string` | Environment ID of the Dynamic project. | Required, if provider is `dynamic` | - | `<your-secret>` | v2.7.0+ |
-| NEXT_PUBLIC_ACCOUNT_API_KEYS_BUTTON | `boolean \| string` | Pass `true` or `false` to enable or disable the "Add API key" button, or provide a URL to convert it into a link. | - | `true` | `https://example.com` | v2.7.0+ |
-| NEXT_PUBLIC_API_KEYS_ALERT_MESSAGE | `string` | Used for displaying custom alerts on the API keys page. Could be a regular string or HTML code. | - | - | `Hello world! 🤪` | v2.7.0+ |
+| NEXT_PUBLIC_API_KEYS_ALERT_MESSAGE | `string` | Used for displaying custom alerts on the API keys page. Could be a regular string or HTML code. On chains supported by the Blockscout Pro API the page shows a built-in deprecation notice by default; this variable overrides it, and an empty value hides it. | - | - | `Hello world! 🤪` | v2.7.0+ |
+| NEXT_PUBLIC_TOKEN_INFO_EXPEDITED_REVIEW_HTML | `string` | Payment instructions shown in the "Need a faster review?" block of the token info application form, as a regular string or HTML code. Setting it enables the block; leaving it empty hides it. Only applies when the address verification workflow is enabled. | - | - | `Send <b>99 USDC</b> to <code>0x123…</code>` | v2.11.0+ |
 
 **Dependencies**
 
@@ -739,15 +741,15 @@ This feature is **enabled by default**. To switch it off pass `NEXT_PUBLIC_ADVAN
 
 | Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
 | --- | --- | --- | --- | --- | --- | --- |
-| NEXT_PUBLIC_API_DOCS_TABS | `Array<TabId>` | Controls which tabs appear on the API documentation page. Possible values for `TabId` are `pro_api`, `rest_api`, `eth_rpc_api`, `rpc_api`, and `graphql_api`. **Note** that this variable has a default value, so the feature is enabled by default. Pass an empty array to disable it. The `pro_api` tab will be automatically added to the default value for chains supported in the Pro API. | - | `['rest_api','eth_rpc_api','rpc_api','graphql_api']` | `[]` | v2.3.x+ |
-| NEXT_PUBLIC_API_DOCS_ALERT_MESSAGE | `string` | Used for displaying custom alerts on the API documentation page. Could be a regular string or HTML code. | - | - | `Hello world! 🤪` | v2.7.0+ |
+| NEXT_PUBLIC_API_DOCS_TABS | `Array<TabId>` | Controls which tabs appear on the API documentation page. Possible values for `TabId` are `rest_api`, `eth_rpc_api`, `rpc_api`, and `graphql_api`. **Note** that this variable has a default value, so the feature is enabled by default. Pass an empty array to disable it. On chains supported by the Blockscout Pro API the page is not rendered unless this variable is set, and the "API" navigation item links to the Blockscout developer portal instead. | - | `['rest_api','eth_rpc_api','rpc_api','graphql_api']` | `[]` | v2.3.x+ |
+| NEXT_PUBLIC_API_DOCS_ALERT_MESSAGE | `string` | Used for displaying custom alerts on the API documentation page. Could be a regular string or HTML code. Deprecated — no longer has any effect and will be removed in the next release. | - | - | `Hello world! 🤪` | v2.7.0+ |
 
 **Dependencies**
 
 | Variable | Compulsoriness |
 | --- | --- |
 | [NEXT_PUBLIC_USER_OPS_INDEXER_API_HOST](#user-operations-indexer-api) | Optional — adds user-ops tab |
-| [NEXT_PUBLIC_PRO_API_SUPPORTED](#misc) | Optional — adds Pro API tab (auto-set at startup) |
+| [NEXT_PUBLIC_PRO_API_SUPPORTED](#misc) | Optional — points the "API" navigation item at the Blockscout developer portal and disables this page unless `NEXT_PUBLIC_API_DOCS_TABS` is set (auto-set at startup) |
 
 &nbsp;
 
@@ -815,14 +817,6 @@ This feature allows users to view tokens that have been bridged from other EVM c
 | --- | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_MEGA_ETH_SOCKET_URL_METRICS | `string` | Public WebSocket endpoint for streaming statistics data, used to display information on the uptime dashboard page. | - | - | `wss://testnet-dashboard.megaeth.com/metrics` | v2.4.0+ |
 | NEXT_PUBLIC_MEGA_ETH_SOCKET_URL_RPC | `string` | Public WebSocket endpoint for streaming RPC node data, including mini-block data. | - | - | `wss://carrot.megaeth.com/mafia/ws` | v2.4.0+ |
-
-#### MUD framework
-
-Optimistic-stack rollups that use the MUD framework. Requires [Rollup](#rollup) feature with `optimistic` type.
-
-| Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
-| --- | --- | --- | --- | --- | --- | --- |
-| NEXT_PUBLIC_HAS_MUD_FRAMEWORK | `boolean` | Set to `true` for instances that use MUD framework (Optimistic stack only) | Required | - | `true` | v1.33.0+ |
 
 #### SUAVE
 
@@ -892,6 +886,8 @@ This feature enables cross-chain transaction tracking and visualization, allowin
 | Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
 | --- | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_CROSS_CHAIN_TXS_ENABLED | `boolean` | The flag that enables the feature | Required | - | `true` | v2.7.0+ |
+| NEXT_PUBLIC_CROSS_CHAIN_TXS_BRIDGE_IDS | `Array<number>` | Ids of the interchain indexer bridges whose messages and transfers this instance is allowed to show. The indexer is shared between deployments and indexes every bridge it knows about, so the ids define this instance's slice of it. | Required | - | `'[1,2]'` | upcoming |
+| NEXT_PUBLIC_CROSS_CHAIN_TXS_INCLUDE_UNINDEXED_CHAINS | `boolean` | Set to `true` to also show messages and transfers whose counterparty chain is not indexed by any of the configured bridges. Such rows have an incomplete counterparty side. | - | `false` | `true` | upcoming |
 
 **Dependencies**
 
@@ -966,11 +962,12 @@ If the feature is enabled, a single button or a dropdown (if more than 1 item is
 
 ### Flashblocks
 
-This feature allows users to view [Flashblocks](https://docs.base.org/base-chain/flashblocks/apps)-related content in the explorer, including the Flashblocks real-time feed. It currently supports only Base chains.
+Real-time feed of sub-second pre-confirmation blocks, shown as a tab on the blocks page. The same feature backs two stacks. On **OP Stack** chains the blocks are streamed from the endpoint below, and the chain's own name for them is set with `NEXT_PUBLIC_FLASHBLOCKS_NAME`: the newer **Subblocks** name (the default) or the legacy **Flashblocks** name. Chains are split between the two and both run the same wire protocol, so only the labels differ. On **MegaETH** they are called **mini-blocks** and are streamed from the MegaETH RPC endpoint (see [MegaETH](#megaeth)). The `FLASHBLOCKS` variable name is retained across both.
 
 | Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
 | --- | --- | --- | --- | --- | --- | --- |
-| NEXT_PUBLIC_FLASHBLOCKS_SOCKET_URL | `string` | Public WebSocket endpoint to stream Flashblocks data | Required | - | `wss://mainnet.flashblocks.base.org/ws` | v2.3.0+ |
+| NEXT_PUBLIC_FLASHBLOCKS_SOCKET_URL | `string` | Public WebSocket endpoint to stream Flashblocks or Subblocks data on OP Stack chains | Required | - | `wss://mainnet.flashblocks.base.org/ws` | v2.3.0+ |
+| NEXT_PUBLIC_FLASHBLOCKS_NAME | `'flashblock' \| 'subblock'` | What the chain calls its pre-confirmation blocks. Drives every user-facing label and the blocks page tab id (`flashblocks` or `subblocks`); the other tab id keeps working and redirects to the configured one. | - | `subblock` | `flashblock` | v2.11.1+ |
 
 &nbsp;
 
@@ -1317,6 +1314,17 @@ OpenTelemetry SDK for the Node.js server-side process. Configure the OpenTelemet
 | --- | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_ROLLBAR_CLIENT_TOKEN | `string` | Client token for your Rollbar project | Required | - | `<your-secret>` | v1.37.x+ |
 
+&nbsp;
+
+### Usercentrics CMP
+
+Integrates [Usercentrics](https://usercentrics.com/) as the Consent Management Platform (CMP). When configured, Blockscout loads the Usercentrics script and waits for marketing consent before enabling analytics providers.
+
+| Variable | Type| Description | Compulsoriness  | Default value | Example value | Version |
+| --- | --- | --- | --- | --- | --- | --- |
+| NEXT_PUBLIC_USERCENTRICS_CONFIG | `{ settingsId?: string; rulesetId?:string }` | Usercentrics configuration with `settingsId` or `rulesetId`. When set, Blockscout injects the CMP script and gates Google Analytics, Mixpanel, Rollbar and other 3rd party services behind marketing consent. The feature is disabled in private mode. | Required | - | `{ 'settingsId': '<your-settings-id>','rulesetId':'<your-ruleset-id>'}` | v2.9.0+ |
+| NEXT_PUBLIC_USERCENTRICS_DRAFT | `boolean` | Set to `true` to load the Usercentrics CMP configuration in its draft (unpublished) version. Intended for previewing consent configuration changes before publishing. | - | - | `true` | v2.9.0+ |
+
 ## Misc
 
 ### Design system
@@ -1339,4 +1347,4 @@ OpenTelemetry SDK for the Node.js server-side process. Configure the OpenTelemet
 
 | Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
 | --- | --- | --- | --- | --- | --- | --- |
-| NEXT_PUBLIC_PRO_API_SUPPORTED | `boolean` | Indicates whether the current chain is supported by Blockscout Pro API. **This variable is automatically set during container startup**; manual configuration is typically not needed. | - | - | `true` | upcoming |
+| NEXT_PUBLIC_PRO_API_SUPPORTED | `boolean` | Indicates whether the current chain is supported by Blockscout Pro API. **This variable is automatically set during container startup**; manual configuration is typically not needed. | - | - | `true` | v2.9.0+ |

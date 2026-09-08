@@ -2,11 +2,11 @@
 
 import React from 'react';
 
-import type { FilecoinActorType } from 'src/features/chain-variants/filecoin/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { Badge } from 'src/toolkit/chakra/badge';
 
-const ACTOR_TYPES: Record<FilecoinActorType, string> = {
+const ACTOR_TYPES: Record<schemas['FilecoinActorType'], string> = {
   account: 'Account',
   cron: 'Scheduled Tasks',
   datacap: 'Data Cap Management',
@@ -18,6 +18,7 @@ const ACTOR_TYPES: Record<FilecoinActorType, string> = {
   miner: 'Storage Provider',
   multisig: 'Multi-Signature Wallet',
   paych: 'Payment Channel',
+  paymentchannel: 'Payment Channel',
   placeholder: 'Placeholder Address',
   power: 'Power Management',
   reward: 'Incentives and Rewards',
@@ -25,8 +26,8 @@ const ACTOR_TYPES: Record<FilecoinActorType, string> = {
   verifreg: 'Verification Registry',
 };
 
-type Props = {
-  actorType: FilecoinActorType;
+interface Props {
+  actorType: schemas['FilecoinActorType'];
 };
 
 const FilecoinActorTag = ({ actorType }: Props) => {

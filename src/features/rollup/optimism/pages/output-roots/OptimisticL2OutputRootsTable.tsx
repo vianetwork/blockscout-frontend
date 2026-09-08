@@ -2,23 +2,27 @@
 
 import React from 'react';
 
-import type { OptimisticL2OutputRootsItem } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { layerLabels } from 'src/features/rollup/common/utils/layer';
 
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
 import OptimisticL2OutputRootsTableItem from './OptimisticL2OutputRootsTableItem';
 
 type Props = {
-  items: Array<OptimisticL2OutputRootsItem>;
+  items: Array<schemas['OptimismOutputRoot']>;
   top: number;
   isLoading?: boolean;
+  resetKey?: string;
 };
 
-const OptimisticL2OutputRootsTable = ({ items, top, isLoading }: Props) => {
+const OptimisticL2OutputRootsTable = ({ items, top, isLoading, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
+
   return (
     <TableRoot minW="900px">
       <TableHeaderSticky top={ top }>
@@ -34,13 +38,14 @@ const OptimisticL2OutputRootsTable = ({ items, top, isLoading }: Props) => {
         </TableRow>
       </TableHeaderSticky>
       <TableBody>
-        { items.map((item, index) => (
+        { items.slice(0, renderedItemsNum).map((item, index) => (
           <OptimisticL2OutputRootsTableItem
             key={ item.l2_output_index + (Number(isLoading ? index : '') ? String(index) : '') }
             item={ item }
             isLoading={ isLoading }
           />
         )) }
+        <TableRow ref={ cutRef }/>
       </TableBody>
     </TableRoot>
   );

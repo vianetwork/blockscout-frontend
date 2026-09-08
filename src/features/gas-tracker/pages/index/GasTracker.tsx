@@ -7,12 +7,11 @@ import {
 } from '@chakra-ui/react';
 import React from 'react';
 
-import useApiQuery from 'src/api/hooks/useApiQuery';
-
 import PageTitle from 'src/shell/page/title/PageTitle';
 
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 import GasInfoUpdateTimer from 'src/slices/gas/components/GasInfoUpdateTimer';
-import { HOMEPAGE_STATS } from 'src/slices/home/stubs';
+import discriminateDetailedPrices from 'src/slices/gas/utils/price';
 import NativeTokenIcon from 'src/slices/token/components/icon/TokenIconNative';
 
 import GasTrackerChart from 'src/features/gas-tracker/components/GasTrackerChart';
@@ -28,12 +27,7 @@ import { Heading } from 'src/toolkit/chakra/heading';
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
 
 const GasTracker = () => {
-  const { data, isPlaceholderData, isError, error, dataUpdatedAt } = useApiQuery('core:stats', {
-    queryOptions: {
-      placeholderData: HOMEPAGE_STATS,
-      refetchOnMount: false,
-    },
-  });
+  const { data, isPlaceholderData, isError, error, dataUpdatedAt } = useStatsQuery();
 
   if (isError) {
     throw new Error(undefined, { cause: error });
@@ -58,7 +52,7 @@ const GasTracker = () => {
         <Skeleton loading={ isLoading } whiteSpace="pre" display="flex" alignItems="center">
           <span>Last updated </span>
           <Time timestamp={ data.gas_price_updated_at } format="DD MMM, HH:mm:ss" color="text.secondary"/>
-          { data.gas_prices_update_in !== 0 && (
+          { data.gas_prices_update_in !== null && data.gas_prices_update_in !== 0 && (
             <GasInfoUpdateTimer
               key={ dataUpdatedAt }
               startTime={ dataUpdatedAt }
@@ -83,18 +77,14 @@ const GasTracker = () => {
       return <Alert status="warning">No recent data available</Alert>;
     }
 
-    return data?.gas_prices ? <GasTrackerPrices prices={ data.gas_prices } isLoading={ isLoading }/> : null;
-  })();
+    const prices = discriminateDetailedPrices(data?.gas_prices);
 
-  const faq = config.metadata.seo.enhancedDataEnabled ? <GasTrackerFaq/> : null;
+    return prices ? <GasTrackerPrices prices={ prices } isLoading={ isLoading }/> : null;
+  })();
 
   return (
     <>
-      <PageTitle
-        title={ config.metadata.seo.enhancedDataEnabled ? `${ config.chain.name } gas tracker` : 'Gas tracker' }
-        secondRow={ titleSecondRow }
-        withTextAd
-      />
+      <PageTitle title="Gas tracker" secondRow={ titleSecondRow } withTextAd/>
       <Heading level="2" mt={ 8 } mb={ 4 }>{ `Track ${ config.chain.name } gas fees` }</Heading>
       { snippets }
       { config.features.stats.isEnabled && (
@@ -102,7 +92,7 @@ const GasTracker = () => {
           <GasTrackerChart/>
         </Box>
       ) }
-      { faq }
+      <GasTrackerFaq/>
     </>
   );
 };

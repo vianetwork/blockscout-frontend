@@ -3,7 +3,7 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
 
-import type { OptimisticL2OutputRootsItem } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import BlockEntityL2 from 'src/features/rollup/common/components/BlockEntityL2';
 import TxEntityL1 from 'src/features/rollup/common/components/TxEntityL1';
@@ -13,13 +13,13 @@ import config from 'src/config';
 import TimeWithTooltip from 'src/shared/date-and-time/TimeWithTooltip';
 import ListItemMobileGrid from 'src/shared/lists/ListItemMobileGrid';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
-import HashStringShorten from 'src/shared/texts/HashStringShorten';
 
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
 const rollupFeature = config.features.rollup;
 
-type Props = { item: OptimisticL2OutputRootsItem; isLoading?: boolean };
+type Props = { item: schemas['OptimismOutputRoot']; isLoading?: boolean };
 
 const OptimisticL2OutputRootsListItem = ({ item, isLoading }: Props) => {
   if (!rollupFeature.isEnabled || rollupFeature.type !== 'optimistic') {
@@ -66,7 +66,7 @@ const OptimisticL2OutputRootsListItem = ({ item, isLoading }: Props) => {
       <ListItemMobileGrid.Value>
         <Flex overflow="hidden" whiteSpace="nowrap" alignItems="center" w="100%" justifyContent="start">
           <Skeleton loading={ isLoading } color="text.secondary">
-            <HashStringShorten hash={ item.output_root } type="long"/>
+            <Truncate value={ item.output_root } type="middle-static" maxSymbols={ 16 }/>
           </Skeleton>
           <CopyToClipboard text={ item.output_root } isLoading={ isLoading }/>
         </Flex>

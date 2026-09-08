@@ -3,7 +3,7 @@
 import { Box } from '@chakra-ui/react';
 import React from 'react';
 
-import type { TokenTransfer } from 'src/slices/token-transfer/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
 
@@ -17,14 +17,14 @@ import type { QueryWithPagesResult } from 'src/shared/pagination/useQueryWithPag
 interface Props {
   txQuery: TxQuery;
   tokenTransferQuery: QueryWithPagesResult<'core:tx_token_transfers'>;
-  tokenTransferFilter?: (data: TokenTransfer) => boolean;
+  tokenTransferFilter?: (data: schemas['TokenTransfer']) => boolean;
   numActiveFilters: number;
   tableTop?: number;
 }
 
 const TxTokenTransferLocal = ({ txQuery, tokenTransferQuery, tokenTransferFilter, numActiveFilters, tableTop }: Props) => {
 
-  let items: Array<TokenTransfer> = [];
+  let items: Array<schemas['TokenTransfer']> = [];
 
   if (tokenTransferQuery.data?.items) {
     if (tokenTransferQuery.isPlaceholderData) {
@@ -37,10 +37,15 @@ const TxTokenTransferLocal = ({ txQuery, tokenTransferQuery, tokenTransferFilter
   const content = tokenTransferQuery.data?.items ? (
     <>
       <Box hideBelow="lg">
-        <TokenTransferTable data={ items } top={ tableTop ?? ACTION_BAR_HEIGHT_DESKTOP } isLoading={ tokenTransferQuery.isPlaceholderData }/>
+        <TokenTransferTable
+          data={ items }
+          top={ tableTop ?? ACTION_BAR_HEIGHT_DESKTOP }
+          isLoading={ tokenTransferQuery.isPlaceholderData }
+          resetKey={ tokenTransferQuery.queryHash }
+        />
       </Box>
       <Box hideFrom="lg">
-        <TokenTransferList data={ items } isLoading={ tokenTransferQuery.isPlaceholderData }/>
+        <TokenTransferList data={ items } isLoading={ tokenTransferQuery.isPlaceholderData } resetKey={ tokenTransferQuery.queryHash }/>
       </Box>
     </>
   ) : null;

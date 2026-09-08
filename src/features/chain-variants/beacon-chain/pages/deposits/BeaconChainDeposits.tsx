@@ -18,13 +18,13 @@ import { generateListStub } from 'src/shared/pagination/utils';
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
 
 import { DEPOSIT } from '../../stubs/deposits';
-import BeaconChainDepositsListItem from './BeaconChainDepositsListItem';
+import BeaconChainDepositsList from './BeaconChainDepositsList';
 import BeaconChainDepositsTable from './BeaconChainDepositsTable';
 
 const feature = config.features.beaconChain;
 
 const BeaconChainDeposits = () => {
-  const { data, isError, isPlaceholderData, pagination } = useQueryWithPages({
+  const { data, isError, isPlaceholderData, pagination, queryHash } = useQueryWithPages({
     resourceName: 'core:deposits',
     options: {
       placeholderData: generateListStub<'core:deposits'>(DEPOSIT, 50, { next_page_params: {
@@ -37,7 +37,7 @@ const BeaconChainDeposits = () => {
   const countersQuery = useApiQuery('core:deposits_counters', {
     queryOptions: {
       placeholderData: {
-        deposits_count: '19091878',
+        deposits_count: 19091878,
       },
     },
   });
@@ -45,14 +45,12 @@ const BeaconChainDeposits = () => {
   const content = data?.items ? (
     <>
       <Box hideFrom="lg">
-        { data.items.map(((item, index) => (
-          <BeaconChainDepositsListItem
-            key={ item.index + (isPlaceholderData ? String(index) : '') }
-            item={ item }
-            view="list"
-            isLoading={ isPlaceholderData }
-          />
-        ))) }
+        <BeaconChainDepositsList
+          items={ data.items }
+          view="list"
+          isLoading={ isPlaceholderData }
+          resetKey={ queryHash }
+        />
       </Box>
       <Box hideBelow="lg">
         <BeaconChainDepositsTable
@@ -60,6 +58,7 @@ const BeaconChainDeposits = () => {
           view="list"
           top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 }
           isLoading={ isPlaceholderData }
+          resetKey={ queryHash }
         />
       </Box>
     </>
@@ -85,10 +84,7 @@ const BeaconChainDeposits = () => {
 
   return (
     <>
-      <PageTitle
-        title={ config.metadata.seo.enhancedDataEnabled ? `${ config.chain.name } deposits` : 'Deposits' }
-        withTextAd
-      />
+      <PageTitle title="Deposits" withTextAd/>
       <DataList
         isError={ isError }
         itemsNum={ data?.items.length }

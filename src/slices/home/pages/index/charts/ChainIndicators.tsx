@@ -6,8 +6,8 @@ import type { TChainIndicator } from 'src/slices/home/types/client';
 
 import useApiQuery from 'src/api/hooks/useApiQuery';
 
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 import useChartDataQuery from 'src/slices/home/hooks/useChartDataQuery';
-import { HOMEPAGE_STATS } from 'src/slices/home/stubs';
 import { isIndicatorEnabled, sortIndicators } from 'src/slices/home/utils/indicators';
 import NativeTokenIcon from 'src/slices/token/components/icon/TokenIconNative';
 
@@ -41,12 +41,7 @@ const ChainIndicators = () => {
     },
   });
 
-  const statsApiQueryResult = useApiQuery('core:stats', {
-    queryOptions: {
-      refetchOnMount: false,
-      placeholderData: HOMEPAGE_STATS,
-    },
-  });
+  const statsApiQueryResult = useStatsQuery();
 
   const indicators: Array<TChainIndicator> = React.useMemo(() => {
     return [
@@ -65,7 +60,7 @@ const ChainIndicators = () => {
               return Number(statsMicroserviceQueryResult.data.yesterday_transactions.value).toLocaleString(undefined, STRING_FORMAT);
             }
           } else {
-            if (typeof statsApiQueryResult?.data?.transactions_today === 'string') {
+            if (typeof statsApiQueryResult?.data?.transactions_today === 'string' && statsApiQueryResult.data.transactions_today !== '') {
               return Number(statsApiQueryResult.data.transactions_today).toLocaleString(undefined, STRING_FORMAT);
             }
           }
@@ -144,7 +139,7 @@ const ChainIndicators = () => {
       {
         id: 'market_cap' as const,
         title: 'Market cap',
-        value: typeof statsApiQueryResult.data?.market_cap !== 'string' ?
+        value: typeof statsApiQueryResult.data?.market_cap !== 'string' || statsApiQueryResult.data.market_cap === '' ?
           '$N/A' :
           '$' + Number(statsApiQueryResult.data.market_cap).toLocaleString(undefined, { maximumFractionDigits: 2, notation: 'compact' }),
         // eslint-disable-next-line max-len

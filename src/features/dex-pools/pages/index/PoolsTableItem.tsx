@@ -3,7 +3,7 @@
 import { Flex, Box, Text } from '@chakra-ui/react';
 import React from 'react';
 
-import type { Pool } from 'src/features/dex-pools/types/api';
+import type * as contractsInfo from '@blockscout/contracts-info-types';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 
@@ -12,16 +12,16 @@ import getPoolLinks from 'src/features/dex-pools/utils/get-pool-links';
 
 import getItemIndex from 'src/shared/lists/get-item-index';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
-import HashStringShorten from 'src/shared/texts/HashStringShorten';
 
 import { Image } from 'src/toolkit/chakra/image';
 import { Link } from 'src/toolkit/chakra/link';
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
 import { TableCell, TableRow } from 'src/toolkit/chakra/table';
 import { Tooltip } from 'src/toolkit/chakra/tooltip';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
-type Props = {
-  item: Pool;
+interface Props {
+  item: contractsInfo.Pool;
   index: number;
   page: number;
   isLoading?: boolean;
@@ -54,7 +54,7 @@ const PoolsTableItem = ({
               />
             ) : (
               <Flex color="text.secondary" alignItems="center">
-                <HashStringShorten hash={ item.pool_id } type="long"/>
+                <Truncate value={ item.pool_id } type="middle-static" maxSymbols={ 16 }/>
                 <CopyToClipboard text={ item.pool_id }/>
               </Flex>
             ) }
@@ -62,7 +62,7 @@ const PoolsTableItem = ({
         </Flex>
       </TableCell>
       <TableCell>
-        <Skeleton loading={ isLoading }>{ item.dex.name }</Skeleton>
+        <Skeleton loading={ isLoading }>{ item.dex?.name ?? '' }</Skeleton>
       </TableCell>
       <TableCell isNumeric>
         <Skeleton loading={ isLoading }>

@@ -3,21 +3,21 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
 import React from 'react';
 
-import type { Block } from 'src/slices/block/types/api';
-import type { Transaction } from 'src/slices/tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 
-import formatBlockRpcData from 'src/slices/block/utils/format-rpc-data';
-import formatTxRpcData from 'src/slices/tx/utils/format-rpc-data';
+import { formatBlockListData } from 'src/slices/block/utils/format-rpc-data';
+import { formatTxListRpcData } from 'src/slices/tx/utils/format-rpc-data';
 
-import { publicClient } from 'src/features/connect-wallet/utils/public-client';
+import { getPublicClient, isPublicClientAvailable } from 'src/features/connect-wallet/utils/public-client';
 
 import { SECOND } from 'src/toolkit/utils/consts';
 
-export type SubscriptionId = 'latest-blocks' | 'latest-txs' | 'stats-widgets';
+export type SubscriptionId = 'latest-blocks' | 'latest-txs' | 'stats-widgets' |
+'stats-widgets-latest-block' | 'stats-widgets-average-block-time';
 
 interface HomeRpcDataContext {
-  blocks: Array<Block>;
-  txs: Array<Transaction>;
+  blocks: Array<schemas['Block']>;
+  txs: Array<schemas['Transaction']>;
   totalTxs: number;
   isError: boolean;
   isLoading: boolean;
@@ -31,8 +31,8 @@ export const HomeRpcDataContext = React.createContext<HomeRpcDataContext | null>
 const ITEMS_LIMIT = 5;
 
 export function HomeRpcDataContextProvider({ children }: { children: React.ReactNode }) {
-  const [ blocks, setBlocks ] = React.useState<Array<Block>>([]);
-  const [ txs, setTxs ] = React.useState<Array<Transaction>>([]);
+  const [ blocks, setBlocks ] = React.useState<Array<schemas['Block']>>([]);
+  const [ txs, setTxs ] = React.useState<Array<schemas['Transaction']>>([]);
   const [ totalTxs, setTotalTxs ] = React.useState(0);
   const [ isLoading, setIsLoading ] = React.useState(true);
   const [ isError, setIsError ] = React.useState(false);
@@ -42,6 +42,7 @@ export function HomeRpcDataContextProvider({ children }: { children: React.React
   const query = useQuery({
     queryKey: [ 'RPC', 'watch-blocks' ],
     queryFn: async() => {
+      const publicClient = await getPublicClient();
       if (!publicClient) {
         return null;
       }
@@ -50,7 +51,7 @@ export function HomeRpcDataContextProvider({ children }: { children: React.React
         onBlock: (block) => {
           setTxs((prevTxs) => {
             try {
-              const newTxs = block.transactions.map((tx) => formatTxRpcData(tx, null, null, block)).filter(Boolean);
+              const newTxs = block.transactions.map((tx) => formatTxListRpcData({ tx, receipt: null, confirmations: null, block })).filter(Boolean);
               const nextTxs = prevTxs.length < ITEMS_LIMIT ? [ ...prevTxs, ...newTxs ].slice(0, ITEMS_LIMIT) : prevTxs;
 
               const totalTxs = prevTxs.length + newTxs.length;
@@ -65,7 +66,7 @@ export function HomeRpcDataContextProvider({ children }: { children: React.React
           setBlocks((prev) => {
             try {
               return [
-                formatBlockRpcData({
+                formatBlockListData({
                   ...block,
                   transactions: block.transactions.map((tx) => tx.hash),
                 }),
@@ -85,19 +86,20 @@ export function HomeRpcDataContextProvider({ children }: { children: React.React
         includeTransactions: true,
       });
     },
-    enabled: Boolean(publicClient) && isEnabled,
+    enabled: isPublicClientAvailable && isEnabled,
   });
 
   const receiptQueries = useQueries({
     queries: txs.map((tx) => ({
       queryKey: [ 'RPC', 'tx-receipt', { hash: tx.hash } ],
       queryFn: async() => {
+        const publicClient = await getPublicClient();
         if (!publicClient) {
           return null;
         }
         return publicClient.getTransactionReceipt({ hash: tx.hash as `0x${ string }` });
       },
-      enabled: txs.length > 0 && !isError && Boolean(publicClient),
+      enabled: txs.length > 0 && !isError && isPublicClientAvailable,
       staleTime: Infinity,
     })),
   });
@@ -133,22 +135,23 @@ export function HomeRpcDataContextProvider({ children }: { children: React.React
   }, [ unwatch ]);
 
   const enable = React.useCallback((isEnabled: boolean, id: SubscriptionId) => {
-    if (!publicClient) {
+    if (!isPublicClientAvailable) {
       setIsError(true);
       setIsLoading(false);
       setIsEnabled(false);
       return;
     }
 
-    setIsEnabled(isEnabled);
     if (isEnabled) {
       setIsLoading(true);
+      setIsEnabled(true);
       setSubscriptions((prev) => [ ...prev, id ]);
     } else {
-      setIsLoading(false);
       setSubscriptions((prev) => {
         const next = prev.filter((subscription) => subscription !== id);
         if (next.length === 0) {
+          setIsEnabled(false);
+          setIsLoading(false);
           unwatch?.();
         }
         return next;

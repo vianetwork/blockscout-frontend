@@ -4,12 +4,12 @@ import { Box, Flex, VStack } from '@chakra-ui/react';
 import { route } from 'nextjs-routes';
 import React from 'react';
 
-import type { Block } from 'src/slices/block/types/api';
+import type { schemas } from '@blockscout/api-types';
 
-import { BLOCK } from 'src/slices/block/stubs/block';
+import { BLOCK_ITEM } from 'src/slices/block/stubs/list';
 import { useHomeRpcDataContext } from 'src/slices/home/contexts/rpc-data-context';
 
-import { publicClient } from 'src/features/connect-wallet/utils/public-client';
+import { isPublicClientAvailable } from 'src/features/connect-wallet/utils/public-client';
 
 import useInitialList from 'src/shared/lists/useInitialList';
 
@@ -34,16 +34,16 @@ const LatestBlocksDegraded = ({ maxNum }: Props) => {
   }, [ enable ]);
 
   const initialList = useInitialList({
-    data: [] as Array<Block>,
+    data: [] as Array<schemas['Block']>,
     idFn: (block) => block.height,
     enabled: !isError,
   });
 
-  if (isError || !publicClient) {
+  if (isError || !isPublicClientAvailable) {
     return <LatestBlocksFallback/>;
   }
 
-  const items = isLoading ? Array(maxNum).fill(BLOCK) : blocks.slice(0, maxNum);
+  const items = isLoading ? Array(maxNum).fill(BLOCK_ITEM) : blocks.slice(0, maxNum);
 
   if (items.length === 0) {
     return <Box textStyle="sm">No latest blocks found.</Box>;

@@ -6,16 +6,16 @@ import React from 'react';
 
 import type * as multichain from '@blockscout/multichain-aggregator-types';
 import type { ClusterChainConfig } from 'src/features/multichain/types/client';
-import type { TokenType } from 'src/slices/token/types/api';
 
 import TokenEntity from 'src/slices/token/components/entity/TokenEntity';
 
 import * as contract from 'src/features/multichain/utils/contract';
 
 import { route } from 'src/shared/router/routes';
-import HashStringShortenDynamic from 'src/shared/texts/HashStringShortenDynamic';
-import shortenString from 'src/shared/texts/shorten-string';
 import SpriteIcon from 'src/sprite/SpriteIcon';
+
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
+import { shortenString } from 'src/toolkit/utils/texts';
 
 import SearchResultListItem from '../SearchResultListItem';
 
@@ -40,7 +40,7 @@ const SearchResultItemToken = ({ data, chain, isMobile }: Props) => {
             icon_url: data.icon_url ?? null,
             name: data.name ?? 'Unnamed token',
             symbol: data.symbol ?? '',
-            type: data.type as unknown as TokenType,
+            type: data.type,
             reputation: null,
           }}
           chain={ chain }
@@ -60,7 +60,7 @@ const SearchResultItemToken = ({ data, chain, isMobile }: Props) => {
           _groupHover={{ color: 'inherit' }}
         >
           { isMobile ? shortenString(data.address_hash) : (
-            <HashStringShortenDynamic hash={ data.address_hash }/>
+            <Truncate value={ data.address_hash }/>
           ) }
         </Box>
         { isVerified && <SpriteIcon name="status/success" boxSize="14px" color="green.500" ml={ 1 } flexShrink={ 0 }/> }

@@ -3,7 +3,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 
-import type { TokenInfo, TokenInstance } from 'src/slices/token/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import NftMedia from 'src/slices/token/components/nft-media/NftMedia';
@@ -14,10 +14,13 @@ import useIsMobile from 'src/shared/hooks/useIsMobile';
 import { route } from 'src/shared/router/routes';
 
 import { Link } from 'src/toolkit/chakra/link';
-import { Skeleton } from 'src/toolkit/chakra/skeleton';
-import { TruncatedTextTooltip } from 'src/toolkit/components/truncation/TruncatedTextTooltip';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
-type Props = { item: TokenInstance; token: TokenInfo; isLoading: boolean };
+interface Props {
+  item: schemas['TokenInstanceInTokenInstancesList'];
+  token: schemas['Token'];
+  isLoading: boolean;
+};
 
 const TokenInventoryItem = ({ item, token, isLoading }: Props) => {
 
@@ -28,6 +31,7 @@ const TokenInventoryItem = ({ item, token, isLoading }: Props) => {
     <NftMedia
       mb="18px"
       data={ item }
+      addressHash={ token.address_hash }
       isLoading={ isLoading }
       autoplayVideo={ false }
       size="md"
@@ -52,20 +56,15 @@ const TokenInventoryItem = ({ item, token, isLoading }: Props) => {
       { item.id && (
         <Flex mb={ 2 } ml={ 1 }>
           <Text whiteSpace="pre" color="text.secondary">ID# </Text>
-          <TruncatedTextTooltip label={ item.id }>
-            <Skeleton loading={ isLoading } overflow="hidden">
-              <Link
-                overflow="hidden"
-                textOverflow="ellipsis"
-                whiteSpace="nowrap"
-                display="block"
-                loading={ isLoading }
-                href={ url }
-              >
-                { item.id }
-              </Link>
-            </Skeleton>
-          </TruncatedTextTooltip>
+          <Link
+            href={ url }
+            loading={ isLoading }
+            display="block"
+            overflow="hidden"
+            minW={ 0 }
+          >
+            <Truncate value={ item.id } type="end" display="block" w="100%"/>
+          </Link>
         </Flex>
       ) }
       { item.owner && (

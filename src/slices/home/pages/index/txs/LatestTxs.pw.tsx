@@ -1,9 +1,9 @@
 import { Box } from '@chakra-ui/react';
 import React from 'react';
 
-import type { AddressParam } from 'src/slices/address/types/api';
+import type { schemas } from '@blockscout/api-types';
 
-import * as txMock from 'src/slices/tx/mocks/tx';
+import * as txMock from 'src/slices/tx/mocks/list';
 
 import * as socketServer from 'playwright/fixtures/socketServer';
 import { test as base, expect, devices } from 'playwright/lib';
@@ -56,11 +56,10 @@ test.describe('small desktop', () => {
               name: 'Very long protocol name that should be truncated',
               tagType: 'protocol',
               ordinal: 0,
-              meta: null,
+              meta: {},
             } ],
-            reputation: null,
           },
-        } as AddressParam,
+        } as schemas['Address'],
       },
     ]);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as statsMock from 'src/slices/home/mocks/stats';
+import * as statsMock from 'src/slices/chain/stats/mocks';
 
 import * as statsLineMock from 'src/features/chain-stats/mocks/line';
 import * as statsLinesMock from 'src/features/chain-stats/mocks/lines';
@@ -13,10 +13,7 @@ test.beforeEach(async({ mockTextAd }) => {
   await mockTextAd();
 });
 
-test('base view +@dark-mode +@mobile', async({ render, mockApiResponse, mockEnvs, page }) => {
-  await mockEnvs([
-    [ 'NEXT_PUBLIC_SEO_ENHANCED_DATA_ENABLED', 'true' ],
-  ]);
+test('base view +@dark-mode +@mobile', async({ render, mockApiResponse, page }) => {
   await mockApiResponse('core:stats', { ...statsMock.base, coin_price: '2442.789' });
   await mockApiResponse('stats:lines', statsLinesMock.base);
   const chartApiUrl = await mockApiResponse(

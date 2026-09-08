@@ -5,28 +5,36 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import React, { useCallback } from 'react';
 import type { MouseEvent } from 'react';
 
-import type { MarketplaceApp } from 'src/features/marketplace/types/client';
+import type { MarketplaceDapp } from '@blockscout/admin-rs-types';
 
 import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
+import { MARKETPLACE_APPS_PLACEHOLDER_COUNT } from '../../hooks/useMarketplaceApps';
 import EmptySearchResult from './EmptySearchResult';
 import MarketplaceAppCard from './MarketplaceAppCard';
 
 type Props = {
-  apps: Array<MarketplaceApp>;
+  apps: Array<MarketplaceDapp>;
   favoriteApps: Array<string>;
   onFavoriteClick: (id: string, isFavorite: boolean, source: 'Discovery view') => void;
   isLoading: boolean;
   selectedCategoryId?: string;
   onAppClick: (event: MouseEvent, id: string) => void;
   graphLinksQuery: UseQueryResult<Record<string, Array<{ title: string; url: string }>>, unknown>;
+  resetKey?: string;
 };
 
 const MarketplaceList = ({
   apps, favoriteApps, onFavoriteClick, isLoading, selectedCategoryId,
-  onAppClick, graphLinksQuery,
+  onAppClick, graphLinksQuery, resetKey,
 }: Props) => {
-  const { cutRef, renderedItemsNum } = useLazyRenderedList(apps, !isLoading, 16);
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({
+    list: apps,
+    isEnabled: !isLoading,
+    minItemsNum: MARKETPLACE_APPS_PLACEHOLDER_COUNT,
+    step: 8,
+    resetKey,
+  });
 
   const handleFavoriteClick = useCallback((id: string, isFavorite: boolean) => {
     onFavoriteClick(id, isFavorite, 'Discovery view');
@@ -62,6 +70,7 @@ const MarketplaceList = ({
             ratingsTotalCount={ app.ratingsTotalCount }
             userRating={ app.userRating }
             graphLinks={ graphLinksQuery.data?.[app.id] }
+            github={ app.github }
           />
         )) }
       </Grid>

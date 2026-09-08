@@ -10,6 +10,7 @@ import type { SearchResultItem } from 'src/slices/search/types/client';
 
 import * as AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import { toBech32Address } from 'src/slices/address/utils/bech32';
+import { toAddressModel } from 'src/slices/address/utils/model';
 import * as BlockEntity from 'src/slices/block/components/entity/BlockEntity';
 import ContractCertifiedLabel from 'src/slices/contract/components/ContractCertifiedLabel';
 import { saveToRecentKeywords } from 'src/slices/search/utils/recent-search-keywords';
@@ -27,16 +28,17 @@ import * as UserOpEntity from 'src/features/user-ops/components/entity/UserOpEnt
 import * as mixpanel from 'src/services/mixpanel';
 import dayjs from 'src/shared/date-and-time/dayjs';
 import Time from 'src/shared/date-and-time/Time';
-import HashStringShortenDynamic from 'src/shared/texts/HashStringShortenDynamic';
 import highlightText from 'src/shared/texts/highlight-text';
 import SpriteIcon from 'src/sprite/SpriteIcon';
 
+import { Badge } from 'src/toolkit/chakra/badge';
 import { useColorMode } from 'src/toolkit/chakra/color-mode';
 import { Image } from 'src/toolkit/chakra/image';
 import { Link } from 'src/toolkit/chakra/link';
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
 import { TableCell, TableRow } from 'src/toolkit/chakra/table';
 import { Tag } from 'src/toolkit/chakra/tag';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 import { SECOND } from 'src/toolkit/utils/consts';
 import { ADDRESS_REGEXP } from 'src/toolkit/utils/regexp';
 
@@ -97,7 +99,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
             <TableCell verticalAlign="middle">
               <Skeleton loading={ isLoading } whiteSpace="nowrap" overflow="hidden" display="flex" alignItems="center">
                 <Box overflow="hidden" whiteSpace="nowrap" w={ data.is_smart_contract_verified ? 'calc(100%-28px)' : 'unset' }>
-                  <HashStringShortenDynamic hash={ hash }/>
+                  <Truncate value={ hash }/>
                 </Box>
                 { data.is_smart_contract_verified && <SpriteIcon name="status/success" boxSize="14px" color="green.500" ml={ 1 } flexShrink={ 0 }/> }
               </Skeleton>
@@ -119,17 +121,16 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
       case 'address': {
         const shouldHighlightHash = ADDRESS_REGEXP.test(searchTerm);
         const addressName = data.name || data.ens_info?.name;
-        const address = {
+        const address = toAddressModel({
           hash: data.address_hash,
           filecoin: {
-            robust: data.filecoin_robust_address,
+            robust: data.filecoin_robust_address ?? null,
+            actor_type: null,
+            id: null,
           },
           is_contract: data.type === 'contract' || data.is_smart_contract_address,
           is_verified: data.is_smart_contract_verified,
-          name: null,
-          implementations: null,
-          ens_domain_name: null,
-        };
+        });
         const expiresText = data.ens_info?.expiry_date ? ` (expires ${ dayjs(data.ens_info.expiry_date).fromNow() })` : '';
         const hash = addressFormat === 'bech32' ? toBech32Address(data.address_hash) : data.address_hash;
 
@@ -205,7 +206,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
             <TableCell verticalAlign="middle">
               <Flex alignItems="center" overflow="hidden">
                 <Box overflow="hidden" whiteSpace="nowrap" w={ data.is_smart_contract_verified ? 'calc(100%-28px)' : 'unset' }>
-                  <HashStringShortenDynamic hash={ hash }/>
+                  <Truncate value={ hash }/>
                 </Box>
                 { data.is_smart_contract_verified && <SpriteIcon name="status/success" boxSize="14px" color="green.500" ml={ 1 } flexShrink={ 0 }/> }
               </Flex>
@@ -287,7 +288,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
                   { data.block_type === 'reorg' && !isLoading && <Tag flexShrink={ 0 }>Reorg</Tag> }
                   { data.block_type === 'uncle' && !isLoading && <Tag flexShrink={ 0 }>Uncle</Tag> }
                   <Skeleton loading={ isLoading } overflow="hidden" whiteSpace="nowrap" display="block">
-                    <HashStringShortenDynamic hash={ data.block_hash } as={ shouldHighlightHash ? 'mark' : 'span' }/>
+                    <Truncate value={ data.block_hash } as={ shouldHighlightHash ? 'mark' : 'span' }/>
                   </Skeleton>
                 </Flex>
               ) }
@@ -324,7 +325,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
               </TxEntity.Container>
             </TableCell>
             <TableCell fontSize="sm" verticalAlign="middle" isNumeric>
-              <Time timestamp={ data.timestamp } color="text.secondary" format="lll_s"/>
+              { data.timestamp && <Time timestamp={ data.timestamp } color="text.secondary" format="lll_s"/> }
             </TableCell>
           </>
         );
@@ -363,7 +364,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
           <>
             <TableCell colSpan={ 2 } fontSize="sm">
               <TacOperationEntity.Container>
-                <TacOperationEntity.Icon type={ data.tac_operation.type }/>
+                <TacOperationEntity.Icon status={ data.tac_operation.status } isLoading={ isLoading }/>
                 <TacOperationEntity.Link
                   isLoading={ isLoading }
                   id={ data.tac_operation.operation_id }
@@ -377,7 +378,14 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
                     mr={ 2 }
                   />
                 </TacOperationEntity.Link>
-                <TacOperationStatus status={ data.tac_operation.type }/>
+                <TacOperationStatus
+                  status={ data.tac_operation.status }
+                  type={ data.tac_operation.type }
+                  errorReason={ data.tac_operation.error_reason }
+                  isRollback={ data.tac_operation.rollback }
+                  isLoading={ isLoading }
+                />
+                { data.tac_operation.rollback && <Badge loading={ isLoading }>Rollback</Badge> }
               </TacOperationEntity.Container>
             </TableCell>
             <TableCell fontSize="sm" verticalAlign="middle" isNumeric>
@@ -430,7 +438,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
               </UserOpEntity.Container>
             </TableCell>
             <TableCell fontSize="sm" verticalAlign="middle" isNumeric>
-              <Time timestamp={ data.timestamp } color="text.secondary" format="lll_s"/>
+              { data.timestamp && <Time timestamp={ data.timestamp } color="text.secondary" format="lll_s"/> }
             </TableCell>
           </>
         );
@@ -475,7 +483,7 @@ const SearchResultTableItem = ({ data, searchTerm, isLoading, addressFormat }: P
               <Flex alignItems="center" overflow="hidden">
                 { hash && (
                   <Box overflow="hidden" whiteSpace="nowrap" w={ data.is_smart_contract_verified ? 'calc(100%-28px)' : 'unset' }>
-                    <HashStringShortenDynamic hash={ hash }/>
+                    <Truncate value={ hash }/>
                   </Box>
                 ) }
                 { data.is_smart_contract_verified && <SpriteIcon name="status/success" boxSize="14px" color="green.500" ml={ 1 } flexShrink={ 0 }/> }

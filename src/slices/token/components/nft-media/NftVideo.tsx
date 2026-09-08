@@ -3,7 +3,7 @@
 import { chakra } from '@chakra-ui/react';
 import React from 'react';
 
-import type { TokenInstance } from 'src/slices/token/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import useLoadImageViaIpfs from './useLoadImageViaIpfs';
 import useNftMediaInfo from './useNftMediaInfo';
@@ -11,17 +11,25 @@ import type { MediaElementProps, Size } from './utils';
 import { videoPlayProps } from './utils';
 
 interface Props extends MediaElementProps<'video'> {
-  instance: TokenInstance;
+  instance: schemas['TokenInstance'] | schemas['TokenInstanceInTokenInstancesList'];
+  addressHash: string;
   autoPlay?: boolean;
   size?: Size;
 }
 
 const POSTER_ALLOWED_TYPES = [ 'image' as const ];
 
-const NftVideo = ({ src, transport, instance, autoPlay = true, onLoad, size = 'original', onError, onClick, ...rest }: Props) => {
+const NftVideo = ({ src, transport, instance, addressHash, autoPlay = true, onLoad, size = 'original', onError, onClick, ...rest }: Props) => {
   const ref = React.useRef<HTMLVideoElement>(null);
 
-  const mediaInfoQuery = useNftMediaInfo({ data: instance, size, field: 'image_url', isEnabled: true, allowedTypes: POSTER_ALLOWED_TYPES });
+  const mediaInfoQuery = useNftMediaInfo({
+    data: instance,
+    addressHash,
+    size,
+    field: 'image_url',
+    isEnabled: true,
+    allowedTypes: POSTER_ALLOWED_TYPES,
+  });
   const loadImageViaIpfs = useLoadImageViaIpfs();
 
   const handleMouseEnter = React.useCallback(() => {

@@ -2,17 +2,17 @@
 
 import React from 'react';
 
-import type { TransactionType } from 'src/slices/tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import type { BadgeProps } from 'src/toolkit/chakra/badge';
 import { Badge } from 'src/toolkit/chakra/badge';
 
 export interface Props extends BadgeProps {
-  types: Array<TransactionType>;
+  types: schemas['Transaction']['transaction_types'];
   isLoading?: boolean;
 }
 
-const TYPES_ORDER: Array<TransactionType> = [
+const TYPES_ORDER: schemas['Transaction']['transaction_types'] = [
   'blob_transaction',
   'rootstock_remasc',
   'rootstock_bridge',
@@ -21,6 +21,10 @@ const TYPES_ORDER: Array<TransactionType> = [
   'token_transfer',
   'contract_call',
   'coin_transfer',
+  // Listed last and deliberately given no label of its own — the details page header carries the
+  // "Sponsored" tag instead, and lists have no room for it. An unlisted type would score -1 here and sort
+  // ahead of every real one, masking labels like "Contract call".
+  'sponsored_transaction',
 ];
 
 const TxType = ({ types, isLoading, ...rest }: Props) => {

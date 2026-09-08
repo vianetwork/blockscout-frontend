@@ -45,7 +45,6 @@ import type {
 import { CORE_API_TOKEN_RESOURCES } from './token';
 import type { CoreApiTxResourceName, CoreApiTxResourcePayload, CoreApiTxPaginationFilters } from './tx';
 import { CORE_API_TX_RESOURCES } from './tx';
-import type { CoreApiV1ResourceName, CoreApiV1ResourcePayload } from './v1';
 import { CORE_API_V1_RESOURCES } from './v1';
 
 export const CORE_API_RESOURCES = {
@@ -72,7 +71,6 @@ R extends CoreApiMiscResourceName ? CoreApiMiscResourcePayload<R> :
 R extends CoreApiRollupResourceName ? CoreApiRollupResourcePayload<R> :
 R extends CoreApiTokenResourceName ? CoreApiTokenResourcePayload<R> :
 R extends CoreApiTxResourceName ? CoreApiTxResourcePayload<R> :
-R extends CoreApiV1ResourceName ? CoreApiV1ResourcePayload<R> :
 never;
 /* eslint-enable @stylistic/indent */
 
@@ -82,7 +80,7 @@ R extends CoreApiAddressResourceName ? CoreApiAddressPaginationFilters<R> :
 R extends CoreApiBlockResourceName ? CoreApiBlockPaginationFilters<R> :
 R extends CoreApiContractResourceName ? CoreApiContractPaginationFilters<R> :
 R extends CoreApiMiscResourceName ? CoreApiMiscPaginationFilters<R> :
-R extends CoreApiRollupResourceName ? CoreApiRollupPaginationFilters<R> :
+R extends CoreApiRollupResourceName ? CoreApiRollupPaginationFilters :
 R extends CoreApiTokenResourceName ? CoreApiTokenPaginationFilters<R> :
 R extends CoreApiTxResourceName ? CoreApiTxPaginationFilters<R> :
 never;
@@ -93,7 +91,7 @@ export type CoreApiPaginationSorting<R extends CoreApiResourceName> =
 R extends CoreApiAddressResourceName ? CoreApiAddressPaginationSorting<R> :
 R extends CoreApiContractResourceName ? CoreApiContractPaginationSorting<R> :
 R extends CoreApiMiscResourceName ? CoreApiMiscPaginationSorting<R> :
-R extends CoreApiRollupResourceName ? CoreApiRollupPaginationSorting<R> :
+R extends CoreApiRollupResourceName ? CoreApiRollupPaginationSorting :
 R extends CoreApiTokenResourceName ? CoreApiTokenPaginationSorting<R> :
 never;
 /* eslint-enable @stylistic/indent */

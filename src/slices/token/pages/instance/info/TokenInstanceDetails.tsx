@@ -3,7 +3,7 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
 
-import type { TokenInfo, TokenInstance } from 'src/slices/token/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import NftMedia from 'src/slices/token/components/nft-media/NftMedia';
@@ -17,31 +17,23 @@ import * as DetailedInfo from 'src/shared/detailed-info/DetailedInfo';
 import DetailedInfoSponsoredItem from 'src/shared/detailed-info/DetailedInfoSponsoredItem';
 import useIsMounted from 'src/shared/hooks/useIsMounted';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
-import HashStringShortenDynamic from 'src/shared/texts/HashStringShortenDynamic';
 
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
 import TokenInstanceCreatorAddress from './TokenInstanceCreatorAddress';
 import TokenInstanceMetadataInfo from './TokenInstanceMetadataInfo';
 import TokenInstanceTransfersCount from './TokenInstanceTransfersCount';
 
 interface Props {
-  data?: TokenInstance;
-  token?: TokenInfo;
+  data?: schemas['TokenInstance'];
+  token?: schemas['Token'];
   isLoading?: boolean;
-  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const TokenInstanceDetails = ({ data, token, scrollRef, isLoading }: Props) => {
+const TokenInstanceDetails = ({ data, token, isLoading }: Props) => {
   const appActionData = useAppActionData(token?.address_hash, !isLoading);
   const isMounted = useIsMounted();
-
-  const handleCounterItemClick = React.useCallback(() => {
-    window.setTimeout(() => {
-      // cannot do scroll instantly, have to wait a little
-      scrollRef?.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 500);
-  }, [ scrollRef ]);
 
   if (!data || !token || !isMounted) {
     return null;
@@ -82,13 +74,13 @@ const TokenInstanceDetails = ({ data, token, scrollRef, isLoading }: Props) => {
           <DetailedInfo.ItemValue>
             <Flex alignItems="center" overflow="hidden">
               <Skeleton loading={ isLoading } overflow="hidden" display="inline-block" w="100%">
-                <HashStringShortenDynamic hash={ data.id }/>
+                <Truncate value={ data.id }/>
               </Skeleton>
               <CopyToClipboard text={ data.id } isLoading={ isLoading }/>
             </Flex>
           </DetailedInfo.ItemValue>
 
-          <TokenInstanceTransfersCount hash={ isLoading ? '' : token.address_hash } id={ isLoading ? '' : data.id } onClick={ handleCounterItemClick }/>
+          <TokenInstanceTransfersCount hash={ isLoading ? '' : token.address_hash } id={ isLoading ? '' : data.id }/>
 
           <TokenNftMarketplaces
             isLoading={ isLoading }
@@ -113,6 +105,7 @@ const TokenInstanceDetails = ({ data, token, scrollRef, isLoading }: Props) => {
         </DetailedInfo.Container>
         <NftMedia
           data={ data }
+          addressHash={ token.address_hash }
           isLoading={ isLoading }
           size="md"
           withFullscreen

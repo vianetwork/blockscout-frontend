@@ -4,8 +4,7 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import type { CeloEpochDetails } from 'src/features/chain-variants/celo/types/api';
-import type { TokenInfo } from 'src/slices/token/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 
@@ -18,8 +17,8 @@ import { ContentLoader } from 'src/toolkit/components/loaders/ContentLoader';
 import { formatRewardType } from './utils';
 
 interface Props {
-  type: keyof CeloEpochDetails['aggregated_election_rewards'];
-  token: TokenInfo;
+  type: keyof schemas['CeloEpochAggregatedElectionRewards'];
+  token: schemas['Token'];
 }
 
 const CeloEpochElectionRewardDetailsMobile = ({ type, token }: Props) => {

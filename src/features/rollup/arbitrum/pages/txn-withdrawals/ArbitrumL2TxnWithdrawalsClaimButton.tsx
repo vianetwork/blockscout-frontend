@@ -4,13 +4,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { useSendTransaction, useSwitchChain } from 'wagmi';
 
-import type { ArbitrumL2MessageClaimResponse, ArbitrumL2TxnWithdrawalsResponse } from '../../types/api';
+import type { operations, schemas } from '@blockscout/api-types';
 
 import useApiFetch from 'src/api/hooks/useApiFetch';
 import { getResourceKey } from 'src/api/hooks/useApiQuery';
 import type { ResourceError } from 'src/api/resources';
 
+import Web3Boundary from 'src/features/connect-wallet/components/Web3Boundary';
 import useWallet from 'src/features/connect-wallet/hooks/useWallet';
+import WithdrawalClaimButton from 'src/features/rollup/common/components/WithdrawalClaimButton';
 
 import config from 'src/config';
 import getErrorMessage from 'src/shared/errors/get-error-message';
@@ -19,7 +21,6 @@ import getErrorProp from 'src/shared/errors/get-error-prop';
 import capitalizeFirstLetter from 'src/shared/texts/capitalize-first-letter';
 
 import { Button } from 'src/toolkit/chakra/button';
-import { Skeleton } from 'src/toolkit/chakra/skeleton';
 import { toaster } from 'src/toolkit/chakra/toaster';
 
 import ArbitrumL2TxnWithdrawalsClaimTx from './ArbitrumL2TxnWithdrawalsClaimTx';
@@ -33,7 +34,7 @@ interface Props {
   isLoading?: boolean;
 }
 
-const ArbitrumL2TxnWithdrawalsClaimButton = ({ messageId, txHash, completionTxHash, isLoading: isDataLoading }: Props) => {
+const ArbitrumL2TxnWithdrawalsClaimButtonContent = ({ messageId, txHash, completionTxHash, isLoading: isDataLoading }: Props) => {
   const [ isPending, setIsPending ] = React.useState(false);
   const [ claimTxHash, setClaimTxHash ] = React.useState<string | undefined>(completionTxHash);
   const apiFetch = useApiFetch();
@@ -51,7 +52,7 @@ const ArbitrumL2TxnWithdrawalsClaimButton = ({ messageId, txHash, completionTxHa
     try {
       setIsPending(true);
 
-      const response = await apiFetch<'core:arbitrum_l2_message_claim', ArbitrumL2MessageClaimResponse, ResourceError<unknown>>(
+      const response = await apiFetch<'core:arbitrum_l2_message_claim', schemas['ArbitrumClaimMessage'], ResourceError<unknown>>(
         'core:arbitrum_l2_message_claim',
         { pathParams: { id: messageId.toString() },
         });
@@ -90,7 +91,7 @@ const ArbitrumL2TxnWithdrawalsClaimButton = ({ messageId, txHash, completionTxHa
   const handleSuccess = React.useCallback(() => {
     queryClient.setQueryData(
       getResourceKey('core:arbitrum_l2_txn_withdrawals', { pathParams: { hash: txHash } }),
-      (prevData: ArbitrumL2TxnWithdrawalsResponse | undefined) => {
+      (prevData: operations['ArbitrumController.withdrawals']['json'] | undefined) => {
         if (!prevData) {
           return;
         }
@@ -127,18 +128,25 @@ const ArbitrumL2TxnWithdrawalsClaimButton = ({ messageId, txHash, completionTxHa
   const isLoading = isPending || web3Wallet.isOpen;
 
   return (
-    <Skeleton loading={ isDataLoading }>
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={ handleClaimClick }
-        loading={ isLoading }
-        loadingText="Claim"
-      >
-        Claim
-      </Button>
-    </Skeleton>
+    <WithdrawalClaimButton
+      onClick={ handleClaimClick }
+      loading={ isLoading }
+      loadingSkeleton={ isDataLoading }
+    >
+      Claim
+    </WithdrawalClaimButton>
   );
 };
+
+// The claim flow drives wagmi hooks (send tx / switch chain) and the receipt child, so the button lives
+// in a wallet island. It renders in the withdrawals list on page load, so the fallback keeps the claim
+// button visible in a loading state (matching its data-loading skeleton) while the runtime loads.
+const ArbitrumL2TxnWithdrawalsClaimButton = (props: Props) => (
+  <Web3Boundary
+    fallback={ <Button size="sm" variant="outline" loadingSkeleton>Claim</Button> }
+  >
+    <ArbitrumL2TxnWithdrawalsClaimButtonContent { ...props }/>
+  </Web3Boundary>
+);
 
 export default React.memo(ArbitrumL2TxnWithdrawalsClaimButton);

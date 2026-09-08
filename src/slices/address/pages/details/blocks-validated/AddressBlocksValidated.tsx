@@ -4,8 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import React from 'react';
 
+import type { operations } from '@blockscout/api-types';
 import type { SocketMessage } from 'src/api/socket/types';
-import type { AddressBlocksValidatedResponse } from 'src/slices/address/types/api';
 
 import { getResourceKey } from 'src/api/hooks/useApiQuery';
 import * as SocketNewItemsNotice from 'src/api/socket/SocketNewItemsNotice';
@@ -14,13 +14,14 @@ import useSocketMessage from 'src/api/socket/useSocketMessage';
 
 import ActionBar, { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
 
-import { BLOCK } from 'src/slices/block/stubs/block';
+import { BLOCK_ITEM } from 'src/slices/block/stubs/list';
 import { currencyUnits } from 'src/slices/chain/units';
 
 import config from 'src/config';
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
 import useIsMounted from 'src/shared/hooks/useIsMounted';
 import DataList from 'src/shared/lists/DataList';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 import Pagination from 'src/shared/pagination/Pagination';
 import useQueryWithPages from 'src/shared/pagination/useQueryWithPages';
 import { generateListStub } from 'src/shared/pagination/utils';
@@ -51,7 +52,7 @@ const AddressBlocksValidated = ({ shouldRender = true, isQueryEnabled = true }: 
     options: {
       enabled: isQueryEnabled,
       placeholderData: generateListStub<'core:address_blocks_validated'>(
-        BLOCK,
+        BLOCK_ITEM,
         50,
         {
           next_page_params: {
@@ -72,7 +73,8 @@ const AddressBlocksValidated = ({ shouldRender = true, isQueryEnabled = true }: 
 
     queryClient.setQueryData(
       getResourceKey('core:address_blocks_validated', { pathParams: { hash: addressHash } }),
-      (prevData: AddressBlocksValidatedResponse | undefined) => {
+      (prevData:
+        operations['AddressController.blocks_validated']['json'] | undefined) => {
         if (!prevData) {
           return;
         }
@@ -99,6 +101,12 @@ const AddressBlocksValidated = ({ shouldRender = true, isQueryEnabled = true }: 
     channel,
     event: 'new_block',
     handler: handleNewSocketMessage,
+  });
+
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({
+    list: query.data?.items,
+    isEnabled: !query.isPlaceholderData,
+    resetKey: query.queryHash,
   });
 
   if (!isMounted || !shouldRender) {
@@ -128,16 +136,17 @@ const AddressBlocksValidated = ({ shouldRender = true, isQueryEnabled = true }: 
             type="block"
             isLoading={ query.isPlaceholderData }
           />
-          { query.data.items.map((item, index) => (
+          { query.data.items.slice(0, renderedItemsNum).map((item, index) => (
             <AddressBlocksValidatedTableItem
               key={ item.height + (query.isPlaceholderData ? String(index) : '') }
-              { ...item }
+              data={ item }
               page={ query.pagination.page }
               isLoading={ query.isPlaceholderData }
             />
           )) }
         </TableBody>
       </TableRoot>
+      <div ref={ cutRef }/>
     </TableContainerScrollable>
   ) : null;
 

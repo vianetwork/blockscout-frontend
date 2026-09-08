@@ -203,39 +203,13 @@ export function generateStandard(): string {
         ### TAC Operations:
 
         \`\`\`bash
-        curl --request GET --url '${config.apis.tac.endpoint}/api/v1/tac/operations'
+        curl --request GET --url '${config.apis.tac.endpoint}/api/v2/tac/operations'
         \`\`\`
 
         ### TAC Operation Info:
 
         \`\`\`bash
-        curl --request GET --url '${config.apis.tac.endpoint}/api/v1/tac/operations/{operation_id}'
-        \`\`\`
-    ` : undefined;
-
-    const REDSTONE_CHAIN_TEMPLATE = config.features.mudFramework.isEnabled ? `
-        ### MUD Worlds
-
-        \`\`\`bash
-        curl --request GET --url '${coreApiUrl}/api/v2/mud/worlds'
-        \`\`\`
-
-        ### MUD World Tables
-
-        \`\`\`bash
-        curl --request GET --url '${coreApiUrl}/api/v2/mud/worlds/{contract_address}/tables'
-        \`\`\`
-
-        ### MUD World Table Records
-
-        \`\`\`bash
-        curl --request GET --url '${coreApiUrl}/api/v2/mud/worlds/{contract_address}/tables/{table_id}/records'
-        \`\`\`
-
-        ### MUD World Table Record
-
-        \`\`\`bash
-        curl --request GET --url '${coreApiUrl}/api/v2/mud/worlds/{contract_address}/tables/{table_id}/records/{record_id}'
+        curl --request GET --url '${config.apis.tac.endpoint}/api/v2/tac/operations/{operation_id}'
         \`\`\`
     ` : undefined;
 
@@ -314,7 +288,6 @@ export function generateStandard(): string {
         CELO_CHAIN_TEMPLATE,
         ZKSYNC_CHAIN_TEMPLATE,
         TAC_CHAIN_TEMPLATE,
-        REDSTONE_CHAIN_TEMPLATE,
         SCROLL_CHAIN_TEMPLATE,
         ZILLIQA_CHAIN_TEMPLATE,
         STABILITY_CHAIN_TEMPLATE,

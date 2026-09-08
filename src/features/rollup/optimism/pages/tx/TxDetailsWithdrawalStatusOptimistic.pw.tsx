@@ -1,9 +1,9 @@
 import { Box } from '@chakra-ui/react';
 import React from 'react';
 
-import type { OpWithdrawal } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
-import * as addressMock from 'src/slices/address/mocks/address';
+import * as addressParamMock from 'src/slices/address/mocks/address-param';
 
 import { ENVS_MAP } from 'playwright/fixtures/mockEnvs';
 import { test, expect } from 'playwright/lib';
@@ -12,7 +12,7 @@ import TxDetailsWithdrawalStatusOptimistic from './TxDetailsWithdrawalStatusOpti
 
 const TX_HASH = '0x7d93a59a228e97d084a635181c3053e324237d07566ec12287eae6da2bcf9456';
 
-const BASE_DATA: OpWithdrawal = {
+const BASE_DATA: schemas['OptimismTransactionWithdrawal'] = {
   l1_transaction_hash: TX_HASH,
   nonce: 1,
   status: 'Waiting for state root',
@@ -21,14 +21,14 @@ const BASE_DATA: OpWithdrawal = {
   msg_target_address_hash: null,
   msg_data: null,
   msg_gas_limit: null,
-  msg_nonce_raw: null,
+  msg_nonce_raw: '0',
   msg_value: null,
 };
 
 test('status=Waiting for state root', async({ render, mockEnvs }) => {
   await mockEnvs(ENVS_MAP.optimisticRollup);
 
-  const data: OpWithdrawal = {
+  const data = {
     ...BASE_DATA,
     status: 'Waiting for state root',
   };
@@ -38,7 +38,7 @@ test('status=Waiting for state root', async({ render, mockEnvs }) => {
       <TxDetailsWithdrawalStatusOptimistic
         data={ data }
         txHash={ TX_HASH }
-        from={ addressMock.withoutName }
+        from={ addressParamMock.withoutName }
       />
     </Box>,
   );
@@ -50,7 +50,7 @@ test.describe('status=Ready for relay', () => {
   test('with claim button', async({ render, mockEnvs }) => {
     await mockEnvs(ENVS_MAP.optimisticRollup);
 
-    const data: OpWithdrawal = {
+    const data = {
       ...BASE_DATA,
       status: 'Ready for relay',
     };
@@ -60,7 +60,7 @@ test.describe('status=Ready for relay', () => {
         <TxDetailsWithdrawalStatusOptimistic
           data={ data }
           txHash={ TX_HASH }
-          from={ addressMock.withoutName }
+          from={ addressParamMock.withoutName }
         />
       </Box>,
     );
@@ -74,7 +74,7 @@ test.describe('status=Ready for relay', () => {
       [ 'NEXT_PUBLIC_ROLLUP_L2_WITHDRAWAL_URL', '' ],
     ]);
 
-    const data: OpWithdrawal = {
+    const data = {
       ...BASE_DATA,
       status: 'Ready for relay',
     };
@@ -84,7 +84,7 @@ test.describe('status=Ready for relay', () => {
         <TxDetailsWithdrawalStatusOptimistic
           data={ data }
           txHash={ TX_HASH }
-          from={ addressMock.withoutName }
+          from={ addressParamMock.withoutName }
         />
       </Box>,
     );
@@ -96,7 +96,7 @@ test.describe('status=Ready for relay', () => {
 test('status=Relayed', async({ render, mockEnvs }) => {
   await mockEnvs(ENVS_MAP.optimisticRollup);
 
-  const data: OpWithdrawal = {
+  const data = {
     ...BASE_DATA,
     status: 'Relayed',
   };
@@ -106,7 +106,7 @@ test('status=Relayed', async({ render, mockEnvs }) => {
       <TxDetailsWithdrawalStatusOptimistic
         data={ data }
         txHash={ TX_HASH }
-        from={ addressMock.withoutName }
+        from={ addressParamMock.withoutName }
       />
     </Box>,
   );

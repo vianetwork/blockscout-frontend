@@ -31,7 +31,7 @@ const LatestCrossChainTxsItemDesktop = ({ data, isLoading }: Props) => {
       </TableCell>
       <TableCell>
         <VStack alignItems="start">
-          <CrossChainMessageEntity id={ data.message_id } isLoading={ isLoading } lineHeight="24px" fontWeight={ 700 }/>
+          <CrossChainMessageEntity id={ data.message_id } bridgeId={ data.bridge?.id } isLoading={ isLoading } lineHeight="24px" fontWeight={ 700 }/>
           <TimeWithTooltip timestamp={ data.send_timestamp || data.receive_timestamp } isLoading={ isLoading } color="text.secondary" timeFormat="absolute"/>
         </VStack>
       </TableCell>
@@ -82,7 +82,7 @@ const LatestCrossChainTxsItemDesktop = ({ data, isLoading }: Props) => {
         </VStack>
       </TableCell>
       <TableCell>
-        <CrossChainBridgeLink data={ data.bridge } isLoading={ isLoading } lineHeight="24px"/>
+        <CrossChainBridgeLink data={ data.bridge } isLoading={ isLoading } messageId={ data.message_id } lineHeight="24px"/>
       </TableCell>
     </TableRow>
   );

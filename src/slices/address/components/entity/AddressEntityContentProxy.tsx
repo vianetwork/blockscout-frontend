@@ -10,7 +10,7 @@ import { Tooltip } from 'src/toolkit/chakra/tooltip';
 import type { ContentProps } from './AddressEntity';
 import AddressEntity from './AddressEntity';
 
-const AddressEntityContentProxy = (props: ContentProps) => {
+const AddressEntityContentProxy = ({ tooltipContentAfter, tooltipInteractive, ...props }: ContentProps) => {
   const implementations = props.address.implementations;
 
   if (!implementations || implementations.length === 0) {
@@ -45,7 +45,7 @@ const AddressEntityContentProxy = (props: ContentProps) => {
         { implementations.map((item) => (
           <AddressEntity
             key={ item.address_hash }
-            address={{ hash: item.address_hash, filecoin: { robust: item.filecoin_robust_address } }}
+            address={{ hash: item.address_hash, filecoin: { robust: item.filecoin_robust_address ?? null, actor_type: null, id: null } }}
             noLink
             noIcon
             noHighlight
@@ -56,12 +56,13 @@ const AddressEntityContentProxy = (props: ContentProps) => {
           />
         )) }
       </Flex>
+      { tooltipContentAfter }
     </>
   );
 
   return (
-    <Tooltip content={ content } interactive contentProps={{ maxW: { base: 'calc(100vw - 8px)', lg: '410px' } }} triggerProps={{ minW: 0 }}>
-      <Box display="inline-flex" w="100%">
+    <Tooltip content={ content } interactive contentProps={{ maxW: { base: 'calc(100vw - 8px)', lg: '410px' } }} >
+      <Box display="inline-flex" w="100%" minW={ 0 }>
         <EntityBase.Content
           { ...props }
           truncation={ nameTag || implementationName || props.address.name ? 'tail' : props.truncation }

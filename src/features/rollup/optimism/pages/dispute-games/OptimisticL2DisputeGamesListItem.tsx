@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import type { OptimisticL2DisputeGamesItem } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import BlockEntityL2 from 'src/features/rollup/common/components/BlockEntityL2';
 import { layerLabels } from 'src/features/rollup/common/utils/layer';
@@ -11,13 +11,13 @@ import config from 'src/config';
 import TimeWithTooltip from 'src/shared/date-and-time/TimeWithTooltip';
 import ListItemMobileGrid from 'src/shared/lists/ListItemMobileGrid';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
-import HashStringShorten from 'src/shared/texts/HashStringShorten';
 
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
 const rollupFeature = config.features.rollup;
 
-type Props = { item: OptimisticL2DisputeGamesItem; isLoading?: boolean };
+type Props = { item: schemas['OptimismGame']; isLoading?: boolean };
 
 const OptimisticL2DisputeGamesListItem = ({ item, isLoading }: Props) => {
   if (!rollupFeature.isEnabled || rollupFeature.type !== 'optimistic') {
@@ -40,7 +40,7 @@ const OptimisticL2DisputeGamesListItem = ({ item, isLoading }: Props) => {
       <ListItemMobileGrid.Label isLoading={ isLoading }>Address</ListItemMobileGrid.Label>
       <ListItemMobileGrid.Value color="text.primary">
         <Skeleton loading={ isLoading } display="flex" overflow="hidden" w="100%" alignItems="center">
-          <HashStringShorten hash={ item.contract_address_hash } type="long"/>
+          <Truncate value={ item.contract_address_hash } type="middle-static" maxSymbols={ 16 }/>
           <CopyToClipboard text={ item.contract_address_hash } ml={ 2 } isLoading={ isLoading }/>
         </Skeleton>
       </ListItemMobileGrid.Value>

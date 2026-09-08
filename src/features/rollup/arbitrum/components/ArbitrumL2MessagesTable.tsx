@@ -2,11 +2,12 @@
 
 import React from 'react';
 
-import type { ArbitrumL2MessagesItem } from '../types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { layerLabels } from 'src/features/rollup/common/utils/layer';
 
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
@@ -14,13 +15,16 @@ import type { MessagesDirection } from './ArbitrumL2Messages';
 import ArbitrumL2MessagesTableItem from './ArbitrumL2MessagesTableItem';
 
 type Props = {
-  items: Array<ArbitrumL2MessagesItem>;
+  items: Array<schemas['ArbitrumMessage']>;
   direction: MessagesDirection;
   top: number;
   isLoading?: boolean;
+  resetKey?: string;
 };
 
-const ArbitrumL2MessagesTable = ({ items, direction, top, isLoading }: Props) => {
+const ArbitrumL2MessagesTable = ({ items, direction, top, isLoading, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
+
   return (
     <TableRoot tableLayout="auto" minW="950px">
       <TableHeaderSticky top={ top }>
@@ -38,7 +42,7 @@ const ArbitrumL2MessagesTable = ({ items, direction, top, isLoading }: Props) =>
         </TableRow>
       </TableHeaderSticky>
       <TableBody>
-        { items.map((item, index) => (
+        { items.slice(0, renderedItemsNum).map((item, index) => (
           <ArbitrumL2MessagesTableItem
             key={ String(item.id) + (isLoading ? index : '') }
             item={ item }
@@ -46,6 +50,7 @@ const ArbitrumL2MessagesTable = ({ items, direction, top, isLoading }: Props) =>
             isLoading={ isLoading }
           />
         )) }
+        <TableRow ref={ cutRef }/>
       </TableBody>
     </TableRoot>
   );

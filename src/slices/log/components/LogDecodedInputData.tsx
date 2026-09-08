@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: LicenseRef-Blockscout
 
+import type { JsxStyleProps } from '@chakra-ui/react';
 import React from 'react';
 
-import type { DecodedInput } from 'src/slices/log/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import LogDecodedInputDataHeader from './LogDecodedInputDataHeader';
 import LogDecodedInputDataTable from './LogDecodedInputDataTable';
 interface Props {
-  data: DecodedInput;
+  data: schemas['DecodedLogInput'] | schemas['DecodedInput'];
   isLoading?: boolean;
   rightSlot?: React.ReactNode;
+  inputsTableProps?: JsxStyleProps;
 }
 
-const LogDecodedInputData = ({ data, isLoading, rightSlot }: Props) => {
+const LogDecodedInputData = ({ data, isLoading, rightSlot, inputsTableProps }: Props) => {
   return (
     <>
       <LogDecodedInputDataHeader
@@ -21,7 +23,7 @@ const LogDecodedInputData = ({ data, isLoading, rightSlot }: Props) => {
         isLoading={ isLoading }
         rightSlot={ rightSlot }
       />
-      { data.parameters.length > 0 && <LogDecodedInputDataTable data={ data.parameters } isLoading={ isLoading }/> }
+      { data.parameters.length > 0 && <LogDecodedInputDataTable data={ data.parameters } isLoading={ isLoading } { ...inputsTableProps }/> }
     </>
   );
 };

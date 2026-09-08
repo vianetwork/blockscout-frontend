@@ -3,7 +3,7 @@
 import BigNumber from 'bignumber.js';
 import React from 'react';
 
-import type { OptimisticL2DepositsItem } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import TxEntity from 'src/slices/tx/components/entity/TxEntity';
 
@@ -19,7 +19,7 @@ import { TableCell, TableRow } from 'src/toolkit/chakra/table';
 
 const rollupFeature = config.features.rollup;
 
-type Props = { item: OptimisticL2DepositsItem; isLoading?: boolean };
+type Props = { item: schemas['OptimismDeposit']; isLoading?: boolean };
 
 const OptimisticDepositsTableItem = ({ item, isLoading }: Props) => {
 
@@ -64,7 +64,7 @@ const OptimisticDepositsTableItem = ({ item, isLoading }: Props) => {
       </TableCell>
       <TableCell verticalAlign="middle">
         <AddressEntityL1
-          address={{ hash: item.l1_transaction_origin, name: '', is_contract: false, is_verified: false, ens_domain_name: null, implementations: null }}
+          address={{ hash: item.l1_transaction_origin, name: '', is_contract: false, is_verified: false, ens_domain_name: null, implementations: [] }}
           isLoading={ isLoading }
           truncation="constant"
           noCopy

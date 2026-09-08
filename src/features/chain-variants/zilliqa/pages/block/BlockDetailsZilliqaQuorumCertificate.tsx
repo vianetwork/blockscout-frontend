@@ -3,7 +3,7 @@
 import { Separator, Grid, GridItem } from '@chakra-ui/react';
 import React from 'react';
 
-import type { ZilliqaNestedQuorumCertificate, ZilliqaQuorumCertificate } from 'src/features/chain-variants/zilliqa/types/api';
+import type { ZilliqaAggregateQuorumCertificate, ZilliqaQuorumCertificate } from 'src/features/chain-variants/zilliqa/types/api';
 
 import * as DetailedInfo from 'src/shared/detailed-info/DetailedInfo';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
@@ -17,9 +17,7 @@ function formatSigners(signers: Array<number>) {
 }
 
 interface Props {
-  data: ZilliqaQuorumCertificate & {
-    nested_quorum_certificates?: Array<ZilliqaNestedQuorumCertificate>;
-  };
+  data: ZilliqaAggregateQuorumCertificate | ZilliqaQuorumCertificate;
 }
 
 const BlockDetailsZilliqaQuorumCertificate = ({ data }: Props) => {
@@ -43,7 +41,7 @@ const BlockDetailsZilliqaQuorumCertificate = ({ data }: Props) => {
       <DetailedInfo.ItemLabel
         hint={ hint() }
       >
-        { data.nested_quorum_certificates ? 'Aggregate quorum certificate' : 'Quorum certificate' }
+        { 'nested_quorum_certificates' in data ? 'Aggregate quorum certificate' : 'Quorum certificate' }
       </DetailedInfo.ItemLabel>
       <DetailedInfo.ItemValue flexWrap="wrap">
         <Grid
@@ -64,7 +62,7 @@ const BlockDetailsZilliqaQuorumCertificate = ({ data }: Props) => {
           <GridItem fontWeight={ 600 }>Signers</GridItem>
           <GridItem whiteSpace="pre-wrap">{ formatSigners(data.signers) }</GridItem>
         </Grid>
-        { data.nested_quorum_certificates && data.nested_quorum_certificates.length > 0 && (
+        { 'nested_quorum_certificates' in data && data.nested_quorum_certificates.length > 0 && (
           <>
             <Separator mt={ 2 } w="100%"/>
             <AccordionRoot

@@ -3,8 +3,7 @@
 import { upperFirst } from 'es-toolkit';
 import React from 'react';
 
-import type { ExcludeNull, ExcludeUndefined } from 'src/shared/types/utils';
-import type { Address } from 'src/slices/address/types/api';
+import type { AddressCeloAccount as TAddressCeloAccount } from 'src/features/chain-variants/celo/types/api';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import { currencyUnits } from 'src/slices/chain/units';
@@ -14,11 +13,11 @@ import * as DetailedInfoItemBreakdown from 'src/shared/detailed-info/DetailedInf
 import NativeCoinValue from 'src/shared/values/entity/NativeCoinValue';
 
 import { Link } from 'src/toolkit/chakra/link';
-import { TruncatedText } from 'src/toolkit/components/truncation/TruncatedText';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
 interface Props {
   isLoading?: boolean;
-  data: ExcludeNull<ExcludeUndefined<Address['celo']>['account']>;
+  data: TAddressCeloAccount;
 }
 
 const AddressCeloAccount = ({ isLoading, data }: Props) => {
@@ -31,7 +30,7 @@ const AddressCeloAccount = ({ isLoading, data }: Props) => {
         Celo account
       </DetailedInfo.ItemLabel>
       <DetailedInfo.ItemValue multiRow>
-        { data.name && <TruncatedText text={ data.name } mr={ 3 }/> }
+        { data.name && <Truncate value={ data.name } type="end" mr={ 3 }/> }
         <DetailedInfoItemBreakdown.Container loading={ isLoading }>
           <DetailedInfoItemBreakdown.Row
             label="Type"
@@ -46,7 +45,7 @@ const AddressCeloAccount = ({ isLoading, data }: Props) => {
               hint="Link to additional information published by the account owner"
             >
               <Link href={ data.metadata_url } external>
-                <TruncatedText text={ data.metadata_url }/>
+                <Truncate value={ data.metadata_url } type="end"/>
               </Link>
             </DetailedInfoItemBreakdown.Row>
           ) }

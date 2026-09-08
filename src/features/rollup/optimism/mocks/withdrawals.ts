@@ -1,19 +1,14 @@
-import type { OptimisticL2WithdrawalsResponse } from 'src/features/rollup/optimism/types/api';
+import type { operations } from '@blockscout/api-types';
 
-export const data: OptimisticL2WithdrawalsResponse = {
+import { withoutName } from 'src/slices/address/mocks/address-param';
+
+export const data: operations['OptimismController.withdrawals']['json'] = {
   items: [
     {
       challenge_period_end: null,
       from: {
+        ...withoutName,
         hash: '0x67aab90c548b284be30b05c376001b4db90b87ba',
-        implementations: null,
-        is_contract: false,
-        is_verified: false,
-        name: null,
-        private_tags: [],
-        public_tags: [],
-        watchlist_names: [],
-        ens_domain_name: null,
       },
       l1_transaction_hash: '0x1a235bee32ac10cb7efdad98415737484ca66386e491cde9e17d42b136dca684',
       l2_timestamp: '2022-02-15T12:50:02.000000Z',
@@ -26,7 +21,7 @@ export const data: OptimisticL2WithdrawalsResponse = {
       msg_target_address_hash: null,
       msg_data: null,
       msg_gas_limit: null,
-      msg_nonce_raw: null,
+      msg_nonce_raw: '',
       msg_value: null,
     },
     {
@@ -43,7 +38,7 @@ export const data: OptimisticL2WithdrawalsResponse = {
       msg_target_address_hash: null,
       msg_data: null,
       msg_gas_limit: null,
-      msg_nonce_raw: null,
+      msg_nonce_raw: '',
       msg_value: null,
     },
     {
@@ -60,7 +55,7 @@ export const data: OptimisticL2WithdrawalsResponse = {
       msg_target_address_hash: null,
       msg_data: null,
       msg_gas_limit: null,
-      msg_nonce_raw: null,
+      msg_nonce_raw: '',
       msg_value: null,
     },
     {

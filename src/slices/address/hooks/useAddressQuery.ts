@@ -4,7 +4,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 
-import type { Address } from 'src/slices/address/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import useApiQuery from 'src/api/hooks/useApiQuery';
 import { retry } from 'src/api/hooks/useQueryClientConfig';
@@ -13,7 +13,7 @@ import type { ResourceError } from 'src/api/resources';
 import { ADDRESS_INFO } from 'src/slices/address/stubs/address';
 import { GET_BALANCE } from 'src/slices/address/stubs/rpc';
 
-import { publicClient } from 'src/features/connect-wallet/utils/public-client';
+import { getPublicClient, isPublicClientAvailable } from 'src/features/connect-wallet/utils/public-client';
 
 import { SECOND } from 'src/toolkit/utils/consts';
 
@@ -21,7 +21,7 @@ type RpcResponseType = [
     bigint | null,
 ];
 
-export type AddressQuery = UseQueryResult<Address, ResourceError<{ status: number }>> & {
+export type AddressQuery = UseQueryResult<schemas['AddressResponse'], ResourceError<{ status: number }>> & {
   isDegradedData: boolean;
 };
 
@@ -54,9 +54,10 @@ export default function useAddressQuery({ hash, isEnabled = true }: Params): Add
     },
   });
 
-  const rpcQuery = useQuery<RpcResponseType, unknown, Address | null>({
+  const rpcQuery = useQuery<RpcResponseType, unknown, schemas['AddressResponse'] | null>({
     queryKey: [ 'RPC', 'address', { hash } ],
     queryFn: async() => {
+      const publicClient = await getPublicClient();
       if (!publicClient) {
         throw new Error('No public RPC client');
       }
@@ -87,16 +88,18 @@ export default function useAddressQuery({ hash, isEnabled = true }: Params): Add
         has_token_transfers: false,
         has_tokens: false,
         has_validated_blocks: false,
-        implementations: null,
+        implementations: [],
         is_contract: false,
         is_verified: false,
         name: null,
         token: null,
         watchlist_address_id: null,
-        private_tags: null,
-        public_tags: null,
-        watchlist_names: null,
-      };
+        is_scam: false,
+        metadata: null,
+        proxy_type: null,
+        reputation: 'ok',
+        has_beacon_chain_withdrawals: false,
+      } as schemas['AddressResponse'];
     },
     placeholderData: [ GET_BALANCE ],
     enabled: (apiQuery.isError || apiQuery.errorUpdateCount > 0) && !(apiQuery.error?.status && NO_RPC_FALLBACK_ERROR_CODES.includes(apiQuery.error?.status)),
@@ -105,7 +108,7 @@ export default function useAddressQuery({ hash, isEnabled = true }: Params): Add
   });
 
   React.useEffect(() => {
-    if (apiQuery.isPlaceholderData || !publicClient) {
+    if (apiQuery.isPlaceholderData || !isPublicClientAvailable) {
       return;
     }
 
@@ -129,10 +132,10 @@ export default function useAddressQuery({ hash, isEnabled = true }: Params): Add
     !NO_RPC_FALLBACK_ERROR_CODES.includes(apiQuery.error?.status ?? 999) &&
     apiQuery.errorUpdateCount > 0 &&
     rpcQuery.data &&
-    publicClient,
+    isPublicClientAvailable,
   );
 
-  const query = isRpcQuery ? rpcQuery as UseQueryResult<Address, ResourceError<{ status: number }>> : apiQuery;
+  const query = isRpcQuery ? rpcQuery as UseQueryResult<schemas['AddressResponse'], ResourceError<{ status: number }>> : apiQuery;
 
   return {
     ...query,
