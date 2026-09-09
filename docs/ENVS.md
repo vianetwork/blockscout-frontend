@@ -303,6 +303,7 @@ Operator-supplied favicon override. The app ships with the generic Blockscout fa
 | Variable | Type | Description | Compulsoriness | Default value | Example value | Version |
 | --- | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_FOOTER_LINKS | `string` | URL of configuration file (`.json` format only) or file content string representation. It contains list of link groups to be displayed in the footer. See [below](#footer-links-configuration-properties) list of available properties for particular group | - | - | `https://example.com/footer_links_config.json` \| `[{'title':'My chain','links':[{'text':'About','url':'https://example.com/about'},{'text':'Contacts','url':'https://example.com/contacts'}]}]` | v1.1.1+ |
+| NEXT_PUBLIC_GIT_REPOSITORY_URL | `string` | Source repository URL for footer commit and tag links. Build-time only; see [build-time variables](./BUILD-TIME_ENVS.md). | - | `https://github.com/blockscout/frontend` | `https://github.com/vianetwork/blockscout-frontend` | upcoming |
 
 The app version shown in the footer is derived from build-time ENV variables `NEXT_PUBLIC_GIT_TAG` and `NEXT_PUBLIC_GIT_COMMIT_SHA` and cannot be overwritten at run-time.
 

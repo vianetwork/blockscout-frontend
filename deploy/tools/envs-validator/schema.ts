@@ -45,6 +45,7 @@ const schema = yup
     // -----------------
     NEXT_PUBLIC_GIT_TAG: yup.string(),
     NEXT_PUBLIC_GIT_COMMIT_SHA: yup.string(),
+    NEXT_PUBLIC_GIT_REPOSITORY_URL: yup.string().test(urlTest),
 
     // II. Run-time ENVs
     // -----------------

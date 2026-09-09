@@ -32,8 +32,8 @@ import { getApiVersionUrl } from './get-api-version-url';
 
 const MAX_LINKS_COLUMNS = 4;
 
-const FRONT_VERSION_URL = `https://github.com/blockscout/frontend/tree/${ config.shell.footer.frontendVersion }`;
-const FRONT_COMMIT_URL = `https://github.com/blockscout/frontend/commit/${ config.shell.footer.frontendCommit }`;
+const FRONT_VERSION_URL = `${ config.shell.footer.frontendRepositoryUrl }/tree/${ config.shell.footer.frontendVersion }`;
+const FRONT_COMMIT_URL = `${ config.shell.footer.frontendRepositoryUrl }/commit/${ config.shell.footer.frontendCommit }`;
 
 const Footer = () => {
 

@@ -63,4 +63,21 @@ pnpm build
 ## Notes
 
 - Upstream documentation still applies for the general Blockscout frontend architecture and Docker-based distribution model.
-- This document only describes fork-specific Via Network behavior and local development notes.
+- This document covers Via Network behavior, local development, and image publication.
+
+## Via image publication
+
+Use [Publish Via frontend](../.github/workflows/publish-via-frontend.yml) for Docker Hub
+releases. Provision frontend-scoped credentials with write access to the
+`vianetwork/blockscout-frontend` Docker Hub repository. Do not copy credentials from
+other repositories.
+
+Publication does not deploy the image. Independently verify the published digest and
+source, version, workflow revision, and run labels before changing the frontend pin in
+`vianetwork/via-infra`, at `nix/modules/explorer/blockscout.nix`.
+
+The local Via preset has development settings and a different API hostname. For a release
+rehearsal, use the effective public settings from the target infrastructure. Keep
+`NEXT_PUBLIC_ROLLUP_TYPE=via`, the Bitcoin testnet4 parent-chain URL, and both ad providers
+set to `none`. Runtime validation and desktop/mobile batch and settlement-link checks
+must pass on the exact image before an operator approves deployment.
