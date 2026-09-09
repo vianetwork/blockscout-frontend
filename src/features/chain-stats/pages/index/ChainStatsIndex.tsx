@@ -23,6 +23,7 @@ const ChainStatsIndex = () => {
     displayedSections,
     sectionId,
     initialFilterQuery,
+    filterQuery,
     interval,
     onSectionChange,
     onIntervalChange,
@@ -31,9 +32,7 @@ const ChainStatsIndex = () => {
 
   return (
     <>
-      <PageTitle
-        title={ config.metadata.seo.enhancedDataEnabled ? `${ config.chain.name } statistic & data` : `${ config.chain.name } stats` }
-      />
+      <PageTitle title={ `${ config.chain.name } stats` }/>
 
       <Box mb={{ base: 6, lg: 8 }}>
         <ChainStatsCounters/>
@@ -59,6 +58,7 @@ const ChainStatsIndex = () => {
         isLoading={ isLoading }
         interval={ interval }
         initialFilterQuery={ initialFilterQuery }
+        filterQuery={ filterQuery }
         sectionId={ sectionId }
       />
     </>

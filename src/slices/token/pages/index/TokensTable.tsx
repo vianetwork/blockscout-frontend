@@ -2,11 +2,13 @@
 
 import React from 'react';
 
+import type { schemas } from '@blockscout/api-types';
 import type { AggregatedTokenInfo } from 'src/features/multichain/types/client';
-import type { TokenInfo, TokensSortingField, TokensSortingValue } from 'src/slices/token/types/api';
+import type { TokensSortingField, TokensSortingValue } from 'src/slices/token/types/api';
 
 import { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
 
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 import { default as getNextSortValueShared } from 'src/shared/sort/get-next-sort-value';
 
 import type { OnValueChangeHandler } from 'src/toolkit/chakra/select';
@@ -23,17 +25,19 @@ const SORT_SEQUENCE: Record<TokensSortingField, Array<TokensSortingValue>> = {
 const getNextSortValue = (getNextSortValueShared<TokensSortingField, TokensSortingValue>).bind(undefined, SORT_SEQUENCE);
 
 type Props = {
-  items: Array<TokenInfo> | Array<AggregatedTokenInfo>;
+  items: Array<schemas['Token']> | Array<AggregatedTokenInfo>;
   page: number;
   sorting?: TokensSortingValue;
   setSorting?: OnValueChangeHandler;
   isLoading?: boolean;
   top?: number;
+  resetKey?: string;
 };
 
-const TokensTable = ({ items, page, isLoading, sorting, setSorting, top }: Props) => {
+const TokensTable = ({ items, page, isLoading, sorting, setSorting, top, resetKey }: Props) => {
 
   const hasSorting = setSorting && sorting;
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
 
   const sort = React.useCallback((field: TokensSortingField) => {
     if (!hasSorting) {
@@ -96,7 +100,7 @@ const TokensTable = ({ items, page, isLoading, sorting, setSorting, top }: Props
         </TableRow>
       </TableHeaderSticky>
       <TableBody>
-        { items.map((item, index) => {
+        { items.slice(0, renderedItemsNum).map((item, index) => {
           const chainIds = 'chain_infos' in item ? Object.keys(item.chain_infos).join(',') : undefined;
 
           return (
@@ -109,6 +113,7 @@ const TokensTable = ({ items, page, isLoading, sorting, setSorting, top }: Props
             />
           );
         }) }
+        <TableRow ref={ cutRef }/>
       </TableBody>
     </TableRoot>
   );

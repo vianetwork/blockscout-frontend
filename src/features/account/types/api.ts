@@ -2,11 +2,10 @@
 
 import type { Abi } from 'viem';
 
-import type { AddressParam } from 'src/slices/address/types/api';
-import type { Transaction } from 'src/slices/tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 export interface TransactionsResponseWatchlist {
-  items: Array<Transaction>;
+  items: Array<schemas['Transaction']>;
   next_page_params: {
     block_number: number;
     index: number;
@@ -15,7 +14,7 @@ export interface TransactionsResponseWatchlist {
 }
 export interface AddressTag {
   address_hash: string;
-  address: AddressParam;
+  address: schemas['Address'];
   name: string;
   id: number;
 }
@@ -90,7 +89,7 @@ export interface WatchlistAddress {
   notification_settings: NotificationSettings;
   notification_methods: NotificationMethods;
   id: number;
-  address: AddressParam;
+  address: schemas['Address'];
   tokens_count: number;
   tokens_fiat_value: string;
   tokens_overflow: boolean;
@@ -117,7 +116,7 @@ export interface CustomAbi {
   name: string;
   id: number;
   contract_address_hash: string;
-  contract_address: AddressParam;
+  contract_address: schemas['Address'];
   abi: Abi;
 }
 
@@ -150,58 +149,3 @@ export type TransactionTagErrors = {
   name: Array<string>;
   identity_id?: Array<string>;
 };
-
-export interface VerifiedAddress {
-  userId: string;
-  chainId: string;
-  contractAddress: string;
-  verifiedDate: string;
-  metadata: {
-    tokenName: string | null;
-    tokenSymbol: string | null;
-  };
-}
-
-export interface VerifiedAddressResponse {
-  verifiedAddresses: Array<VerifiedAddress>;
-}
-
-export interface TokenInfoApplicationConfig {
-  projectSectors: Array<string>;
-}
-
-export interface TokenInfoApplication {
-  adminComments?: string;
-  coinGeckoTicker?: string;
-  coinMarketCapTicker?: string;
-  comment?: string;
-  defiLlamaTicker?: string;
-  discord?: string;
-  docs?: string;
-  facebook?: string;
-  github?: string;
-  iconUrl: string;
-  id: string;
-  linkedin?: string;
-  medium?: string;
-  openSea?: string;
-  projectDescription?: string;
-  projectEmail: string;
-  projectName?: string;
-  projectSector?: string;
-  projectWebsite: string;
-  reddit?: string;
-  requesterEmail: string;
-  requesterName: string;
-  slack?: string;
-  status: 'STATUS_UNKNOWN' | 'IN_PROCESS' | 'APPROVED' | 'REJECTED' | 'UPDATE_REQUIRED';
-  support?: string;
-  telegram?: string;
-  tokenAddress: string;
-  twitter?: string;
-  updatedAt: string;
-}
-
-export interface TokenInfoApplications {
-  submissions: Array<TokenInfoApplication>;
-}

@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { CHAIN_INDICATOR_IDS, type ChainIndicatorId, type HeroBannerConfig, type HeroBannerButtonState, HOME_STATS_WIDGET_IDS, type HomeStatsWidgetId } from 'src/slices/home/types/config';
+import { CHAIN_INDICATOR_IDS, type ChainIndicatorId, type HeroBannerConfig, type HeroBannerButtonState, type HeroBannerSearchBorderColorState, HOME_STATS_WIDGET_IDS, type HomeStatsWidgetId } from 'src/slices/home/types/config';
 import { replaceQuotes } from 'src/config/utils/envs';
 import { getYupValidationErrorMessage, urlTest } from '../utils';
 import { NavigationLayout, NavigationPromoBannerConfig, NavItemExternal } from 'src/shell/navigation/types';
@@ -7,6 +7,7 @@ import type { FeaturedNetwork } from 'src/shell/top-bar/chain-menu/types';
 import { NETWORK_GROUPS } from 'src/shell/top-bar/chain-menu/types';
 import { AlternativeExplorer } from 'src/features/alternative-explorers/types/client';
 import { CustomLink, CustomLinksGroup } from 'src/shell/footer/types';
+import type { ColorThemeId } from 'src/shell/top-bar/settings/color-theme/config';
 import { COLOR_THEME_IDS } from 'src/shell/top-bar/settings/color-theme/config';
 import type { FontFamily } from 'src/config/misc';
 import type { ContractCodeIde } from 'src/slices/contract/types/config';
@@ -25,6 +26,13 @@ const heroBannerButtonStateSchema: yup.ObjectSchema<HeroBannerButtonState> = yup
     text_color: yup.array().max(2).of(yup.string()),
   });
 
+const heroBannerSearchBorderColorSchema: yup.ObjectSchema<HeroBannerSearchBorderColorState> = yup.object({
+    _empty: yup.array().max(2).of(yup.string()),
+    _hover: yup.array().max(2).of(yup.string()),
+    _focus: yup.array().max(2).of(yup.string()),
+    _filled: yup.array().max(2).of(yup.string()),
+  });
+
 const heroBannerSchema: yup.ObjectSchema<HeroBannerConfig> = yup.object()
     .transform(replaceQuotes)
     .json()
@@ -38,7 +46,9 @@ const heroBannerSchema: yup.ObjectSchema<HeroBannerConfig> = yup.object()
         _selected: heroBannerButtonStateSchema,
       }),
       search: yup.object({
+        background: yup.array().max(2).of(yup.string()),
         border_width: yup.array().max(2).of(yup.string()),
+        border_color: heroBannerSearchBorderColorSchema,
       }),
       text: yup.string(),
     });
@@ -229,7 +239,27 @@ export const miscSchema = yup.object({
 
         return isStringSchema.isValidSync(data) || isArrayOfStringsSchema.isValidSync(data);
       }),
-    NEXT_PUBLIC_COLOR_THEME_DEFAULT: yup.string().oneOf(COLOR_THEME_IDS),
+    NEXT_PUBLIC_COLOR_THEMES: yup
+      .array()
+      .transform(replaceQuotes)
+      .json()
+      .of(yup.string<ColorThemeId>().oneOf(COLOR_THEME_IDS)),
+    NEXT_PUBLIC_COLOR_THEME_DEFAULT: yup
+      .string()
+      .oneOf(COLOR_THEME_IDS)
+      .test(
+        'available-theme-required',
+        'NEXT_PUBLIC_COLOR_THEME_DEFAULT must be one of the themes listed in NEXT_PUBLIC_COLOR_THEMES',
+        function(value) {
+          const themes: Array<ColorThemeId> | undefined = this.parent.NEXT_PUBLIC_COLOR_THEMES;
+
+          if (!value || !themes?.length) {
+            return true;
+          }
+
+          return themes.includes(value as ColorThemeId);
+        }
+      ),
     NEXT_PUBLIC_COLOR_THEME_OVERRIDES: yup.object().transform(replaceQuotes).json(),
     NEXT_PUBLIC_FONT_FAMILY_HEADING: yup
       .mixed()

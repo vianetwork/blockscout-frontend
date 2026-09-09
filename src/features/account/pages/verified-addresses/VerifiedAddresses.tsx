@@ -5,7 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import type { VerifiedAddress, TokenInfoApplication, TokenInfoApplications, VerifiedAddressResponse } from 'src/features/account/types/api';
+import type * as adminRs from '@blockscout/admin-rs-types';
+import type * as contractsInfo from '@blockscout/contracts-info-types';
 
 import useApiQuery, { getResourceKey } from 'src/api/hooks/useApiQuery';
 
@@ -25,6 +26,7 @@ import config from 'src/config';
 import * as mixpanel from 'src/services/mixpanel';
 import DataList from 'src/shared/lists/DataList';
 import getQueryParamString from 'src/shared/router/get-query-param-string';
+import { collator } from 'src/shared/texts/collator';
 
 import { Button } from 'src/toolkit/chakra/button';
 import { Link } from 'src/toolkit/chakra/link';
@@ -67,7 +69,7 @@ const VerifiedAddresses = () => {
       select: (data) => {
         return {
           ...data,
-          submissions: data.submissions.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+          submissions: data.submissions.sort((a, b) => collator.compare(b.updatedAt, a.updatedAt)),
         };
       },
     },
@@ -87,10 +89,10 @@ const VerifiedAddresses = () => {
     setSelectedAddress(address);
   }, []);
 
-  const handleAddressSubmit = React.useCallback((newItem: VerifiedAddress) => {
+  const handleAddressSubmit = React.useCallback((newItem: contractsInfo.VerifiedAddress) => {
     queryClient.setQueryData(
       getResourceKey('contractInfo:verified_addresses', { pathParams: { instanceId: config.apis.contractInfo?.instanceId } }),
-      (prevData: VerifiedAddressResponse | undefined) => {
+      (prevData: contractsInfo.ListUserVerifiedAddressesResponse | undefined) => {
         if (!prevData) {
           return { verifiedAddresses: [ newItem ] };
         }
@@ -101,11 +103,11 @@ const VerifiedAddresses = () => {
       });
   }, [ queryClient ]);
 
-  const handleApplicationSubmit = React.useCallback((newItem: TokenInfoApplication) => {
+  const handleApplicationSubmit = React.useCallback((newItem: adminRs.TokenInfoSubmission) => {
     setSelectedAddress(undefined);
     queryClient.setQueryData(
       getResourceKey('admin:token_info_applications', { pathParams: { instanceId: config.apis.admin?.instanceId, id: undefined } }),
-      (prevData: TokenInfoApplications | undefined) => {
+      (prevData: adminRs.ListTokenInfoSubmissionsResponse | undefined) => {
         if (!prevData) {
           return { submissions: [ newItem ] };
         }
@@ -136,7 +138,7 @@ const VerifiedAddresses = () => {
 
   if (selectedAddress) {
     const addressInfo = addressesQuery.data?.verifiedAddresses.find(({ contractAddress }) => contractAddress.toLowerCase() === selectedAddress.toLowerCase());
-    const tokenName = addressInfo ? `${ addressInfo.metadata.tokenName } (${ addressInfo.metadata.tokenSymbol })` : '';
+    const tokenName = addressInfo?.metadata ? `${ addressInfo.metadata.tokenName } (${ addressInfo.metadata.tokenSymbol })` : '';
     const beforeTitle = <BackToButton onClick={ handleGoBack } hint="Back to my verified addresses" mr={ 3 }/>;
 
     return (

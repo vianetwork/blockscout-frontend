@@ -1,17 +1,17 @@
-import type { ValidatorZilliqa, ValidatorsZilliqaItem, ValidatorsZilliqaResponse } from 'src/features/chain-variants/zilliqa/types/api';
+import type { operations, schemas } from '@blockscout/api-types';
 
-export const validator1: ValidatorsZilliqaItem = {
+export const validator1: schemas['ZilliqaStaker'] = {
   index: 420,
   bls_public_key: '0x95125dca41be848801f9bd75254f1faf1ae3194b1da53e9a5684ed7f67b729542482bc521924603b9703c33bf831a100',
   balance: '1000000000000000000',
 };
 
-export const validatorsResponse: ValidatorsZilliqaResponse = {
+export const validatorsResponse: operations['ValidatorController.zilliqa_validators_list']['json'] = {
   items: [ validator1 ],
   next_page_params: null,
 };
 
-export const validatorDetails: ValidatorZilliqa = {
+export const validatorDetails: schemas['ZilliqaStakerDetailed'] = {
   added_at_block_number: 7527600,
   balance: '20000000000000000000000000',
   bls_public_key: '0x95125dca41be848801f9bd75254f1faf1ae3194b1da53e9a5684ed7f67b729542482bc521924603b9703c33bf831a100',
@@ -27,6 +27,8 @@ export const validatorDetails: ValidatorZilliqa = {
     proxy_type: null,
     public_tags: [],
     watchlist_names: [],
+    is_scam: false,
+    reputation: 'ok',
   },
   index: 1,
   peer_id: '0x002408011220a8ce8c9a146f3dc411cd72ba845b76722824c55824ac74b3362f070a332d85f2',
@@ -42,6 +44,8 @@ export const validatorDetails: ValidatorZilliqa = {
     proxy_type: null,
     public_tags: [],
     watchlist_names: [],
+    is_scam: false,
+    reputation: 'ok',
   },
   signing_address: {
     ens_domain_name: null,
@@ -55,6 +59,8 @@ export const validatorDetails: ValidatorZilliqa = {
     proxy_type: null,
     public_tags: [],
     watchlist_names: [],
+    is_scam: false,
+    reputation: 'ok',
   },
   stake_updated_at_block_number: 7527642,
 };

@@ -3,21 +3,21 @@
 import BigNumber from 'bignumber.js';
 import React from 'react';
 
-import type { TokenHolder, TokenInfo } from 'src/slices/token/types/api';
+import type { schemas } from '@blockscout/api-types';
 import { hasTokenIds, isConfidentialTokenType } from 'src/slices/token/utils/token-types';
 
-import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
+import AddressEntityWithTokenFilter from 'src/slices/address/components/entity/AddressEntityWithTokenFilter';
 
 import AssetValue from 'src/shared/values/entity/AssetValue';
 import ConfidentialValue from 'src/shared/values/entity/ConfidentialValue';
 import Utilization from 'src/shared/values/utilization/Utilization';
 
 import { TableCell, TableRow } from 'src/toolkit/chakra/table';
-import { TruncatedText } from 'src/toolkit/components/truncation/TruncatedText';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
-type Props = {
-  holder: TokenHolder;
-  token: TokenInfo;
+interface Props {
+  holder: schemas['TokenHolderResponse'];
+  token: schemas['Token'];
   isLoading?: boolean;
 };
 
@@ -25,16 +25,18 @@ const TokenTransferTableItem = ({ holder, token, isLoading }: Props) => {
   return (
     <TableRow>
       <TableCell verticalAlign="middle">
-        <AddressEntity
+        <AddressEntityWithTokenFilter
           address={ holder.address }
+          tokenHash={ token.address_hash }
+          tokenSymbol={ token.symbol ?? undefined }
           isLoading={ isLoading }
           flexGrow={ 1 }
           fontWeight="700"
         />
       </TableCell>
-      { (hasTokenIds(token.type)) && 'token_id' in holder && (
+      { (hasTokenIds(token.type)) && 'token_id' in holder && holder.token_id !== null && (
         <TableCell verticalAlign="middle">
-          <TruncatedText text={ holder.token_id } loading={ isLoading } w="100%"/>
+          <Truncate value={ holder.token_id } type="end" loading={ isLoading } w="100%"/>
         </TableCell>
       ) }
       <TableCell verticalAlign="middle" isNumeric>
@@ -51,7 +53,7 @@ const TokenTransferTableItem = ({ holder, token, isLoading }: Props) => {
       { token.total_supply && token.type !== 'ERC-404' && !isConfidentialTokenType(token.type) && (
         <TableCell verticalAlign="middle" isNumeric>
           <Utilization
-            value={ BigNumber(holder.value).div(BigNumber(token.total_supply)).dp(4).toNumber() }
+            value={ BigNumber(holder.value ?? '0').div(BigNumber(token.total_supply)).dp(4).toNumber() }
             colorScheme="green"
             display="inline-flex"
             isLoading={ isLoading }

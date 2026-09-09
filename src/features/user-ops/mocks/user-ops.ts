@@ -1,15 +1,13 @@
-import type { UserOpsResponse } from 'src/features/user-ops/types/api';
+import type { operations } from '@blockscout/api-types';
 
-export const userOpsData: UserOpsResponse = {
+import { withoutName, contract } from 'src/slices/address/mocks/address-param';
+export const userOpsData: operations['Proxy.AccountAbstractionController.operations']['json'] = {
   items: [
     {
       address: {
-        ens_domain_name: null,
+        ...withoutName,
         hash: '0xF0C14FF4404b188fAA39a3507B388998c10FE284',
-        implementations: null,
         is_contract: true,
-        is_verified: null,
-        name: null,
       },
       block_number: '10399597',
       fee: '187125856691380',
@@ -17,31 +15,29 @@ export const userOpsData: UserOpsResponse = {
       status: true,
       timestamp: '2022-01-19T12:42:12.000000Z',
       transaction_hash: '0x715fe1474ac7bea3d6f4a03b1c5b6d626675fb0b103be29f849af65e9f1f9c6a',
+      entry_point: contract,
+      entry_point_version: 'v0.6',
     },
     {
-      address:
-        { ens_domain_name: null,
-          hash: '0x2c298CcaFFD1549e1C21F46966A6c236fCC66dB2',
-          implementations: null,
-          is_contract: true,
-          is_verified: null,
-          name: null,
-        },
+      address: {
+        ...withoutName,
+        hash: '0x2c298CcaFFD1549e1C21F46966A6c236fCC66dB2',
+        is_contract: true,
+      },
       block_number: '10399596',
       fee: '381895502291373',
       hash: '0xcb945ae86608bdc88c3318245403c81a880fcb1e49fef18ac59477761c056cea',
       status: false,
       timestamp: '2022-01-19T12:42:00.000000Z',
       transaction_hash: '0x558d699e7cbc235461d48ed04b8c3892d598a4000f20851760d00dc3513c2e48',
+      entry_point: contract,
+      entry_point_version: 'v0.6',
     },
     {
       address: {
-        ens_domain_name: null,
+        ...withoutName,
         hash: '0x2c298CcaFFD1549e1C21F46966A6c236fCC66dB2',
-        implementations: null,
         is_contract: true,
-        is_verified: null,
-        name: null,
       },
       block_number: '10399560',
       fee: '165019501210143',
@@ -49,6 +45,8 @@ export const userOpsData: UserOpsResponse = {
       status: true,
       timestamp: '2022-01-19T12:32:00.000000Z',
       transaction_hash: '0xc4c1c38680ec63139411aa2193275e8de44be15217c4256db9473bf0ea2b6264',
+      entry_point: contract,
+      entry_point_version: 'v0.6',
     },
   ],
   next_page_params: {

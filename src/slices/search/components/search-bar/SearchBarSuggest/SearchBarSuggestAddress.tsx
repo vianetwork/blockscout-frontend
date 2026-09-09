@@ -4,23 +4,24 @@ import { chakra, Box, Text, Flex, Grid } from '@chakra-ui/react';
 import React from 'react';
 
 import type { ItemsProps } from './types';
+import type { schemas } from '@blockscout/api-types';
 import type * as multichain from 'src/features/multichain/types/client';
-import type { SearchResultAddressOrContract, SearchResultMetadataTag as TSearchResultMetadataTag } from 'src/slices/search/types/api';
 
 import * as AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import { toBech32Address } from 'src/slices/address/utils/bech32';
+import { toAddressModel } from 'src/slices/address/utils/model';
 import ContractCertifiedLabel from 'src/slices/contract/components/ContractCertifiedLabel';
 import SearchResultMetadataTag from 'src/slices/search/pages/search-results/SearchResultMetadataTag';
 
 import * as contract from 'src/features/multichain/utils/contract';
 
 import dayjs from 'src/shared/date-and-time/dayjs';
-import HashStringShortenDynamic from 'src/shared/texts/HashStringShortenDynamic';
 import highlightText from 'src/shared/texts/highlight-text';
 
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 import { ADDRESS_REGEXP } from 'src/toolkit/utils/regexp';
 
-type Props = ItemsProps<SearchResultAddressOrContract | TSearchResultMetadataTag | multichain.QuickSearchResultAddress>;
+type Props = ItemsProps<schemas['SearchResultAddressOrContract'] | schemas['SearchResultMetadataTag'] | multichain.QuickSearchResultAddress>;
 
 const SearchBarSuggestAddress = ({ data, isMobile, searchTerm, addressFormat }: Props) => {
   const shouldHighlightHash = ADDRESS_REGEXP.test(searchTerm);
@@ -43,14 +44,12 @@ const SearchBarSuggestAddress = ({ data, isMobile, searchTerm, addressFormat }: 
 
   const icon = (
     <AddressEntity.Icon
-      address={{
+      address={ toAddressModel({
         hash: data.address_hash,
         is_contract: isContract,
         name: '',
         is_verified: isVerified,
-        ens_domain_name: null,
-        implementations: null,
-      }}
+      }) }
     />
   );
   const addressName = (() => {
@@ -82,7 +81,7 @@ const SearchBarSuggestAddress = ({ data, isMobile, searchTerm, addressFormat }: 
   const tagEl = data.type === 'metadata_tag' ? (
     <SearchResultMetadataTag metadata={ data.metadata } addressHash={ hash } searchTerm={ searchTerm } ml={{ base: 0, lg: 'auto' }}/>
   ) : null;
-  const addressEl = <HashStringShortenDynamic hash={ hash } noTooltip/>;
+  const addressEl = <Truncate value={ hash } tooltip={ false }/>;
 
   if (isMobile) {
     return (

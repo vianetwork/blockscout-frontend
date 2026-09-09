@@ -3,7 +3,7 @@
 import { Box, Flex, Text, Grid, HStack } from '@chakra-ui/react';
 import React from 'react';
 
-import type { NFTTokenType } from 'src/slices/token/types/api';
+import type { NftTokenType } from 'src/slices/token/types/api';
 
 import ActionBar from 'src/shell/page/action-bar/ActionBar';
 
@@ -14,6 +14,7 @@ import { useMultichainContext } from 'src/features/multichain/context';
 
 import useIsMobile from 'src/shared/hooks/useIsMobile';
 import DataList from 'src/shared/lists/DataList';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 import Pagination from 'src/shared/pagination/Pagination';
 import type { QueryWithPagesResult } from 'src/shared/pagination/useQueryWithPages';
 import { route } from 'src/shared/router/routes';
@@ -25,11 +26,15 @@ import AddressNftItem from './AddressNftItem';
 import AddressNftItemContainer from './AddressNftItemContainer';
 import AddressNftTypeFilter from './AddressNftTypeFilter';
 
+// each rendered row is a whole collection with its own nested grid of NFTs, so the initial
+// window is smaller than the flat-grid layouts
+const INITIAL_RENDERED_COLLECTIONS_NUM = 10;
+
 type Props = {
   collectionsQuery: QueryWithPagesResult<'core:address_collections'>;
   address: string;
-  tokenTypes: Array<NFTTokenType> | undefined;
-  onTokenTypesChange: (value: Array<NFTTokenType>) => void;
+  tokenTypes: Array<NftTokenType> | undefined;
+  onTokenTypesChange: (value: Array<NftTokenType>) => void;
 };
 
 const AddressNftsCollections = ({ collectionsQuery, address, tokenTypes, onTokenTypesChange }: Props) => {
@@ -37,6 +42,14 @@ const AddressNftsCollections = ({ collectionsQuery, address, tokenTypes, onToken
   const multichainContext = useMultichainContext();
 
   const { isError, isPlaceholderData, data, pagination } = collectionsQuery;
+
+  const items = data?.items?.filter((item) => item.token_instances.length > 0);
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({
+    list: items,
+    isEnabled: !isPlaceholderData,
+    minItemsNum: INITIAL_RENDERED_COLLECTIONS_NUM,
+    resetKey: collectionsQuery.queryHash,
+  });
 
   const hasActiveFilters = Boolean(tokenTypes?.length);
 
@@ -47,14 +60,13 @@ const AddressNftsCollections = ({ collectionsQuery, address, tokenTypes, onToken
     </ActionBar>
   );
 
-  const content = data?.items ? data?.items.filter((item) => item.token_instances.length > 0).map((item, index) => {
+  const renderedCollections = items?.slice(0, renderedItemsNum).map((item, index) => {
     const collectionUrl = route({
       pathname: '/token/[hash]',
       query: {
         hash: item.token.address_hash,
         tab: 'inventory',
         holder_address_hash: address,
-        scroll_to_tabs: 'true',
       },
     }, { chain: multichainContext?.chain });
     const hasOverload = Number(item.amount) > item.token_instances.length;
@@ -90,7 +102,7 @@ const AddressNftsCollections = ({ collectionsQuery, address, tokenTypes, onToken
             return (
               <AddressNftItem
                 key={ key }
-                { ...instance }
+                instance={ instance }
                 token={ item.token }
                 isLoading={ isPlaceholderData }
                 chain={ multichainContext?.chain }
@@ -112,7 +124,14 @@ const AddressNftsCollections = ({ collectionsQuery, address, tokenTypes, onToken
         </Grid>
       </Box>
     );
-  }) : null;
+  });
+
+  const content = renderedCollections ? (
+    <>
+      { renderedCollections }
+      <div ref={ cutRef }/>
+    </>
+  ) : null;
 
   return (
     <DataList

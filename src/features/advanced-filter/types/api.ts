@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Blockscout
 
-import type { AddressParam } from 'src/slices/address/types/api';
-import type { TokenInfo, TokenType } from 'src/slices/token/types/api';
+import type { TokenType } from 'src/slices/token/types/api';
 
 export const ADVANCED_FILTER_ADDRESS_RELATION = [ 'or', 'and' ] as const;
 export type AddressRelation = typeof ADVANCED_FILTER_ADDRESS_RELATION[number];
@@ -30,44 +29,3 @@ export type AdvancedFilterType = 'coin_transfer' | 'contract_creation' | 'contra
 
 export const ADVANCED_FILTER_AGES = [ '1h', '24h', '7d', '1m', '3m', '6m' ] as const;
 export type AdvancedFilterAge = typeof ADVANCED_FILTER_AGES[number];
-
-export type AdvancedFilterResponseItem = {
-  fee: string;
-  from: AddressParam;
-  created_contract?: AddressParam;
-  hash: string;
-  method: string | null;
-  timestamp: string;
-  to: AddressParam;
-  token: TokenInfo | null;
-  total: {
-    decimals: string | null;
-    value: string;
-  } | null;
-  type: string;
-  value: string | null;
-};
-
-export type AdvancedFiltersSearchParams = {
-  methods: Record<string, string>;
-  tokens: Record<string, TokenInfo>;
-};
-
-export type AdvancedFilterResponse = {
-  items: Array<AdvancedFilterResponseItem>;
-  search_params: AdvancedFiltersSearchParams;
-  next_page_params: {
-    block_number: number;
-    internal_transaction_index: number | null;
-    token_transfer_index: number | null;
-    transaction_index: number;
-    items_count: number;
-  };
-};
-
-export type AdvancedFilterMethodsResponse = Array<AdvancedFilterMethodInfo>;
-
-export type AdvancedFilterMethodInfo = {
-  method_id: string;
-  name?: string;
-};

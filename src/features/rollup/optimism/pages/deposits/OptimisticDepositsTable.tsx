@@ -2,25 +2,29 @@
 
 import React from 'react';
 
-import type { OptimisticL2DepositsItem } from 'src/features/rollup/optimism/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { AddressHighlightProvider } from 'src/slices/address/contexts/address-highlight';
 
 import { layerLabels } from 'src/features/rollup/common/utils/layer';
 
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
 import OptimisticDepositsTableItem from './OptimisticDepositsTableItem';
 
 type Props = {
-  items: Array<OptimisticL2DepositsItem>;
+  items: Array<schemas['OptimismDeposit']>;
   top: number;
   isLoading?: boolean;
+  resetKey?: string;
 };
 
-const OptimisticDepositsTable = ({ items, top, isLoading }: Props) => {
+const OptimisticDepositsTable = ({ items, top, isLoading, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
+
   return (
     <AddressHighlightProvider>
       <TableRoot tableLayout="auto" minW="950px">
@@ -38,9 +42,10 @@ const OptimisticDepositsTable = ({ items, top, isLoading }: Props) => {
           </TableRow>
         </TableHeaderSticky>
         <TableBody>
-          { items.map((item, index) => (
+          { items.slice(0, renderedItemsNum).map((item, index) => (
             <OptimisticDepositsTableItem key={ item.l2_transaction_hash + (isLoading ? index : '') } item={ item } isLoading={ isLoading }/>
           )) }
+          <TableRow ref={ cutRef }/>
         </TableBody>
       </TableRoot>
     </AddressHighlightProvider>

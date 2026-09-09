@@ -2,17 +2,16 @@
 
 import type { BoxProps } from '@chakra-ui/react';
 import { Box, chakra } from '@chakra-ui/react';
-import BigNumber from 'bignumber.js';
 import { route } from 'nextjs-routes';
 import React from 'react';
 
+import type { schemas } from '@blockscout/api-types';
 import type { ClusterChainConfig } from 'src/features/multichain/types/client';
 import type {
   TxInterpretationSummary,
   TxInterpretationVariable,
   TxInterpretationVariableString,
 } from 'src/features/tx-interpretation/common/types/api';
-import type { AddressParam } from 'src/slices/address/types/api';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 import { currencyUnits } from 'src/slices/chain/units';
@@ -35,6 +34,7 @@ import { Skeleton } from 'src/toolkit/chakra/skeleton';
 import { Tooltip } from 'src/toolkit/chakra/tooltip';
 import { SECOND } from 'src/toolkit/utils/consts';
 
+import formatCurrencyValue from '../utils/format-currency-value';
 import {
   extractVariables,
   getStringChunks,
@@ -49,7 +49,7 @@ const nameServicesFeature = config.features.nameServices;
 interface Props extends BoxProps {
   summary?: TxInterpretationSummary;
   isLoading?: boolean;
-  addressDataMap?: Record<string, AddressParam>;
+  addressDataMap?: Record<string, schemas['Address']>;
   className?: string;
   isNoves?: boolean;
   chainData?: ClusterChainConfig;
@@ -58,7 +58,7 @@ interface Props extends BoxProps {
 type NonStringTxInterpretationVariable = Exclude<TxInterpretationVariable, TxInterpretationVariableString>;
 
 const TxInterpretationElementByType = (
-  { variable, addressDataMap }: { variable?: NonStringTxInterpretationVariable; addressDataMap?: Record<string, AddressParam> },
+  { variable, addressDataMap }: { variable?: NonStringTxInterpretationVariable; addressDataMap?: Record<string, schemas['Address']> },
 ) => {
   const onAddressClick = React.useCallback(() => {
     mixpanel.logEvent(mixpanel.EventTypes.TX_INTERPRETATION_INTERACTION, { Type: 'Address click' });
@@ -125,17 +125,7 @@ const TxInterpretationElementByType = (
       return <chakra.span color="text.secondary" whiteSpace="pre">{ value + ' ' }</chakra.span>;
     }
     case 'currency': {
-      let numberString = '';
-      if (BigNumber(value).isLessThan(0.1)) {
-        numberString = BigNumber(value).toPrecision(2);
-      } else if (BigNumber(value).isLessThan(10000)) {
-        numberString = BigNumber(value).dp(2).toFormat();
-      } else if (BigNumber(value).isLessThan(1000000)) {
-        numberString = BigNumber(value).dividedBy(1000).toFormat(2) + 'K';
-      } else {
-        numberString = BigNumber(value).dividedBy(1000000).toFormat(2) + 'M';
-      }
-      return <chakra.span>{ numberString + ' ' }</chakra.span>;
+      return <chakra.span>{ formatCurrencyValue(value) + ' ' }</chakra.span>;
     }
     case 'timestamp': {
       return <chakra.span color="text.secondary" whiteSpace="pre">{ dayjs(Number(value) * SECOND).format('MMM DD YYYY') }</chakra.span>;
@@ -247,9 +237,12 @@ const TxInterpretation = ({ summary, isLoading, addressDataMap, className, chain
             />
           );
         }
+        const trimmedChunk = chunk.trim();
+        const textColor = trimmedChunk.includes('failed to call') ? 'text.error' : 'text.secondary';
+
         return (
           <chakra.span key={ chunk + index }>
-            <chakra.span color="text.secondary">{ chunk.trim() + (chunk.trim() && variablesNames[index] ? ' ' : '') }</chakra.span>
+            <chakra.span color={ textColor }>{ trimmedChunk + (trimmedChunk && variablesNames[index] ? ' ' : '') }</chakra.span>
             { index < variablesNames.length && content }
           </chakra.span>
         );

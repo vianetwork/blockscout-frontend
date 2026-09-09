@@ -3,7 +3,7 @@
 import { Box, chakra } from '@chakra-ui/react';
 import React from 'react';
 
-import type { CeloEpochDetails } from 'src/features/chain-variants/celo/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import BlockEntity from 'src/slices/block/components/entity/BlockEntity';
 import TokenTransferSnippet from 'src/slices/token-transfer/components/snippet/TokenTransferSnippet';
@@ -19,7 +19,7 @@ import TokenValue from 'src/shared/values/entity/TokenValue';
 import EpochElectionRewards from './election-rewards/EpochElectionRewards';
 
 interface Props {
-  data: CeloEpochDetails;
+  data: schemas['CeloEpochDetailed'];
   isLoading?: boolean;
 }
 
@@ -52,9 +52,9 @@ const EpochDetails = ({ data, isLoading }: Props) => {
     if (data.distribution?.transfers_total?.token) {
       return (
         <TokenValue
-          amount={ data.distribution?.transfers_total?.total?.value }
-          token={ data.distribution?.transfers_total.token }
-          decimals={ data.distribution?.transfers_total?.total?.decimals }
+          amount={ data.distribution.transfers_total.total?.value }
+          token={ data.distribution.transfers_total.token }
+          decimals={ data.distribution.transfers_total.total?.decimals }
           accuracy={ 0 }
           loading={ isLoading }
         />

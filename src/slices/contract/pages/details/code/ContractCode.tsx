@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import type { Channel } from 'phoenix';
 import React from 'react';
 
-import type { Address, AddressImplementation } from 'src/slices/address/types/api';
+import type { schemas } from '@blockscout/api-types';
 import type { SmartContract } from 'src/slices/contract/types/api';
 
 import useApiQuery from 'src/api/hooks/useApiQuery';
@@ -32,7 +32,7 @@ const TAB_LIST_PROPS = { flexWrap: 'wrap', rowGap: 2 };
 const LEFT_SLOT_PROPS = { w: { base: '100%', lg: 'auto' } };
 
 type Props = {
-  addressData: Address;
+  addressData: schemas['AddressResponse'];
   channel: Channel | undefined;
   mainContractQuery: UseQueryResult<SmartContract, ResourceError>;
 };
@@ -42,7 +42,7 @@ const ContractDetails = ({ addressData, channel, mainContractQuery }: Props) => 
   const sourceAddress = getQueryParamString(router.query.source_address);
   const multichainContext = useMultichainContext();
 
-  const sourceItems: Array<AddressImplementation> = React.useMemo(() => {
+  const sourceItems: Array<schemas['Implementation']> = React.useMemo(() => {
     const currentAddressDefaultName = addressData?.proxy_type === 'eip7702' ? 'Current address' : 'Current contract';
     const currentAddressItem = { address_hash: addressData.hash, name: addressData?.name || currentAddressDefaultName };
     if (!addressData || !addressData.implementations || addressData.implementations.length === 0) {
@@ -55,7 +55,7 @@ const ContractDetails = ({ addressData, channel, mainContractQuery }: Props) => 
     ];
   }, [ addressData ]);
 
-  const [ selectedItem, setSelectedItem ] = React.useState<AddressImplementation | undefined>(undefined);
+  const [ selectedItem, setSelectedItem ] = React.useState<schemas['Implementation'] | undefined>(undefined);
 
   React.useEffect(() => {
     if (!mainContractQuery.isPlaceholderData) {

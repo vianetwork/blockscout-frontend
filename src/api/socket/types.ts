@@ -2,17 +2,22 @@
 
 import type { Channel } from 'phoenix';
 
+import type { schemas } from '@blockscout/api-types';
 import type * as multichain from '@blockscout/multichain-aggregator-types';
 import type * as zetaChainCCTXType from '@blockscout/zetachain-cctx-types';
 import type { NewArbitrumBatchSocketResponse } from 'src/features/rollup/arbitrum/types/api';
-import type { AddressCoinBalanceHistoryItem, AddressTokensBalancesSocketMessage } from 'src/slices/address/types/api';
-import type { NewBlockSocketResponse } from 'src/slices/block/types/api';
+import type {
+  AddressCoinBalanceSocketMessage,
+  AddressTokenTransferSocketMessage,
+  AddressTokensBalancesSocketMessage,
+  AddressTransactionsSocketMessage,
+} from 'src/slices/address/types/api';
+import type { NewBlockCountSocketResponse, NewBlockSocketResponse } from 'src/slices/block/types/api';
 import type { SmartContractVerificationResponse } from 'src/slices/contract/types/api';
-import type { TokenTransfer } from 'src/slices/token-transfer/types/api';
 import type { TokenInstanceMetadataSocketMessage } from 'src/slices/token/types/api';
-import type { Transaction, TxRawTracesResponse } from 'src/slices/tx/types/api';
 
 export type SocketMessageParams = SocketMessage.NewBlock |
+SocketMessage.NewBlockCount |
 SocketMessage.NewBlockMultichain |
 SocketMessage.BlocksIndexStatus |
 SocketMessage.InternalTxsIndexStatus |
@@ -55,11 +60,12 @@ interface SocketMessageParamsGeneric<Event extends string | undefined, Payload e
 
 export namespace SocketMessage {
   export type NewBlock = SocketMessageParamsGeneric<'new_block', NewBlockSocketResponse>;
+  export type NewBlockCount = SocketMessageParamsGeneric<'new_blocks_count', NewBlockCountSocketResponse>;
   export type NewBlockMultichain = SocketMessageParamsGeneric<'new_blocks', Array<{ block_number: number; chain_id: number }>>;
   export type BlocksIndexStatus = SocketMessageParamsGeneric<'index_status', { finished: boolean; ratio: string }>;
   export type InternalTxsIndexStatus = SocketMessageParamsGeneric<'index_status', { finished: boolean; ratio: string }>;
   export type TxStatusUpdate = SocketMessageParamsGeneric<'collated', NewBlockSocketResponse>;
-  export type TxRawTrace = SocketMessageParamsGeneric<'raw_trace', TxRawTracesResponse>;
+  export type TxRawTrace = SocketMessageParamsGeneric<'raw_trace', schemas['RawTrace']>;
   export type NewTx = SocketMessageParamsGeneric<'transaction', { transaction: number }>;
   export type NewInteropMessage = SocketMessageParamsGeneric<'new_messages', Array<multichain.InteropMessage>>;
   export type NewPendingTx = SocketMessageParamsGeneric<'pending_transaction', { pending_transaction: number }>;
@@ -73,10 +79,10 @@ export namespace SocketMessage {
   export type AddressTokenBalancesErc721 = SocketMessageParamsGeneric<'updated_token_balances_erc_721', AddressTokensBalancesSocketMessage>;
   export type AddressTokenBalancesErc1155 = SocketMessageParamsGeneric<'updated_token_balances_erc_1155', AddressTokensBalancesSocketMessage>;
   export type AddressTokenBalancesErc404 = SocketMessageParamsGeneric<'updated_token_balances_erc_404', AddressTokensBalancesSocketMessage>;
-  export type AddressCoinBalance = SocketMessageParamsGeneric<'coin_balance', { coin_balance: AddressCoinBalanceHistoryItem }>;
-  export type AddressTxs = SocketMessageParamsGeneric<'transaction', { transactions: Array<Transaction> }>;
-  export type AddressTxsPending = SocketMessageParamsGeneric<'pending_transaction', { transactions: Array<Transaction> }>;
-  export type AddressTokenTransfer = SocketMessageParamsGeneric<'token_transfer', { token_transfers: Array<TokenTransfer> }>;
+  export type AddressCoinBalance = SocketMessageParamsGeneric<'coin_balance', AddressCoinBalanceSocketMessage>;
+  export type AddressTxs = SocketMessageParamsGeneric<'transaction', AddressTransactionsSocketMessage>;
+  export type AddressTxsPending = SocketMessageParamsGeneric<'pending_transaction', AddressTransactionsSocketMessage>;
+  export type AddressTokenTransfer = SocketMessageParamsGeneric<'token_transfer', AddressTokenTransferSocketMessage>;
   export type AddressChangedBytecode = SocketMessageParamsGeneric<'changed_bytecode', Record<string, never>>;
   export type AddressFetchedBytecode = SocketMessageParamsGeneric<'fetched_bytecode', { fetched_bytecode: string }>;
   export type EthBytecodeDbLookupStarted = SocketMessageParamsGeneric<'eth_bytecode_db_lookup_started', Record<string, never>>;

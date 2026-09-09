@@ -4,25 +4,23 @@ import { Box, chakra, Flex } from '@chakra-ui/react';
 import React from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useSignMessage, useAccount, useSwitchChain } from 'wagmi';
 
 import type {
   AddressVerificationFormSecondStepFields,
-  AddressCheckStatusSuccess,
   AddressVerificationFormFirstStepFields,
   RootFields,
   AddressVerificationResponseError,
-  AddressValidationResponseSuccess,
 } from '../types';
-import type { VerifiedAddress } from 'src/features/account/types/api';
+import * as contractsInfo from '@blockscout/contracts-info-types';
 
 import useApiFetch from 'src/api/hooks/useApiFetch';
 
+import useAccount from 'src/features/connect-wallet/hooks/useAccount';
 import useWallet from 'src/features/connect-wallet/hooks/useWallet';
+import { getWeb3Runtime } from 'src/features/connect-wallet/utils/runtime';
 
 import config from 'src/config';
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
-import shortenString from 'src/shared/texts/shorten-string';
 
 import { Alert } from 'src/toolkit/chakra/alert';
 import { Button } from 'src/toolkit/chakra/button';
@@ -30,6 +28,7 @@ import { Link } from 'src/toolkit/chakra/link';
 import { Radio, RadioGroup } from 'src/toolkit/chakra/radio';
 import { FormFieldText } from 'src/toolkit/components/forms/fields/FormFieldText';
 import { SIGNATURE_REGEXP } from 'src/toolkit/components/forms/validators/signature';
+import { shortenString } from 'src/toolkit/utils/texts';
 
 import AdminSupportText from '../../AdminSupportText';
 
@@ -37,16 +36,19 @@ type Fields = RootFields & AddressVerificationFormSecondStepFields;
 
 type SignMethod = 'wallet' | 'manual';
 
-interface Props extends AddressVerificationFormFirstStepFields, AddressCheckStatusSuccess {
-  onContinue: (newItem: VerifiedAddress, signMethod: SignMethod) => void;
+interface Props extends AddressVerificationFormFirstStepFields, contractsInfo.PrepareAddressResponse_Success {
+  onContinue: (newItem: contractsInfo.VerifiedAddress, signMethod: SignMethod) => void;
   noWeb3Provider?: boolean;
 }
 
-const AddressVerificationStepSignature = ({ address, signingMessage, contractCreator, contractOwner, onContinue, noWeb3Provider }: Props) => {
+const AddressVerificationStepSignature = (
+  { address, signingMessage, contractCreator, contractOwner, contractDeployer, onContinue, noWeb3Provider }: Props,
+) => {
   const [ signMethod, setSignMethod ] = React.useState<SignMethod>(noWeb3Provider ? 'manual' : 'wallet');
 
   const { isConnected } = useAccount();
   const { openModal: openWeb3Modal } = useWallet({ source: 'Smart contracts' });
+  const [ isSigning, setIsSigning ] = React.useState(false);
 
   const formApi = useForm<Fields>({
     mode: 'onBlur',
@@ -71,7 +73,7 @@ const AddressVerificationStepSignature = ({ address, signingMessage, contractCre
         signature: data.signature,
       };
 
-      const response = await apiFetch<'contractInfo:address_verification', AddressValidationResponseSuccess, AddressVerificationResponseError>(
+      const response = await apiFetch<'contractInfo:address_verification', contractsInfo.VerifyAddressResponse, AddressVerificationResponseError>(
         'contractInfo:address_verification',
         {
           fetchParams: { method: 'POST', body },
@@ -79,21 +81,23 @@ const AddressVerificationStepSignature = ({ address, signingMessage, contractCre
         },
       );
 
-      if (response.status !== 'SUCCESS') {
-        const type = typeof response.status === 'number' ? 'UNKNOWN_STATUS' : response.status;
-        return setError('root', { type, message: response.status === 'INVALID_SIGNER_ERROR' ? response.invalidSigner.signer : undefined });
+      if (response.status !== contractsInfo.VerifyAddressResponse_Status.SUCCESS || !response.result?.verifiedAddress) {
+        const type = typeof response.status === 'number' ? contractsInfo.VerifyAddressResponse_Status.UNKNOWN_STATUS : response.status;
+        return setError('root', {
+          type,
+          message: response.status === contractsInfo.VerifyAddressResponse_Status.INVALID_SIGNER_ERROR && response.invalidSigner ?
+            response.invalidSigner.signer :
+            undefined,
+        });
       }
 
       onContinue(response.result.verifiedAddress, signMethod);
     } catch (error) {
-      setError('root', { type: 'UNKNOWN_STATUS' });
+      setError('root', { type: contractsInfo.VerifyAddressResponse_Status.UNKNOWN_STATUS });
     }
   }, [ address, apiFetch, onContinue, setError, signMethod ]);
 
   const onSubmit = handleSubmit(onFormSubmit);
-
-  const { signMessage, isPending: isSigning } = useSignMessage();
-  const { switchChainAsync } = useSwitchChain();
 
   const handleSignMethodChange = React.useCallback(({ value }: { value: string | null }) => {
     if (!value) {
@@ -116,18 +120,20 @@ const AddressVerificationStepSignature = ({ address, signingMessage, contractCre
       return setError('root', { type: 'manual', message: 'Please connect to your Web3 wallet first' });
     }
 
-    await switchChainAsync({ chainId: Number(config.chain.id) });
-    const message = getValues('message');
-    signMessage({ message }, {
-      onSuccess: (data) => {
-        setValue('signature', data);
-        onSubmit();
-      },
-      onError: (error) => {
-        return setError('root', { type: 'SIGNING_FAIL', message: (error as Error)?.message || 'Oops! Something went wrong' });
-      },
-    });
-  }, [ clearErrors, isConnected, getValues, signMessage, setError, setValue, onSubmit, switchChainAsync ]);
+    setIsSigning(true);
+    try {
+      const runtime = await getWeb3Runtime();
+      await runtime.switchChain({ chainId: Number(config.chain.id) });
+      const message = getValues('message');
+      const data = await runtime.signMessage({ message });
+      setValue('signature', data);
+      onSubmit();
+    } catch (error) {
+      setError('root', { type: 'SIGNING_FAIL', message: (error as Error)?.message || 'Oops! Something went wrong' });
+    } finally {
+      setIsSigning(false);
+    }
+  }, [ clearErrors, isConnected, getValues, setError, setValue, onSubmit ]);
 
   const handleManualSignClick = React.useCallback(() => {
     clearErrors('root');
@@ -162,29 +168,29 @@ const AddressVerificationStepSignature = ({ address, signingMessage, contractCre
 
   const rootError = (() => {
     switch (formState.errors.root?.type) {
-      case 'INVALID_SIGNATURE_ERROR': {
+      case contractsInfo.VerifyAddressResponse_Status.INVALID_SIGNATURE_ERROR: {
         return <span>The signature could not be processed.</span>;
       }
-      case 'VALIDITY_EXPIRED_ERROR': {
+      case contractsInfo.VerifyAddressResponse_Status.VALIDITY_EXPIRED_ERROR: {
         return <span>This verification message has expired. Add the contract address to restart the process.</span>;
       }
       case 'SIGNING_FAIL': {
         return <span>{ formState.errors.root.message }</span>;
       }
-      case 'INVALID_SIGNER_ERROR': {
+      case contractsInfo.VerifyAddressResponse_Status.INVALID_SIGNER_ERROR: {
         const signer = shortenString(formState.errors.root.message || '');
-        const expectedSigners = [ contractCreator, contractOwner ].filter(Boolean).map(s => shortenString(s)).join(', ');
+        const expectedSigners = [ contractCreator, contractOwner, contractDeployer ].filter(Boolean).map(s => shortenString(s)).join(', ');
         return (
           <Box>
             <span>This address </span>
             <span>{ signer }</span>
-            <span> is not a creator/owner of the requested contract and cannot claim ownership. Only </span>
+            <span> is not a creator/owner/deployer of the requested contract and cannot claim ownership. Only </span>
             <span>{ expectedSigners }</span>
             <span> can verify ownership of this contract.</span>
           </Box>
         );
       }
-      case 'UNKNOWN_STATUS': {
+      case contractsInfo.VerifyAddressResponse_Status.UNKNOWN_STATUS: {
         return (
           <Box>
             <span>We are not able to process the verify account ownership for this contract address. Kindly </span>
@@ -212,7 +218,7 @@ const AddressVerificationStepSignature = ({ address, signingMessage, contractCre
           { contactUsLink }
           <span> for further assistance.</span>
         </Box>
-        { (contractOwner || contractCreator) && (
+        { (contractOwner || contractCreator || contractDeployer) && (
           <Flex flexDir="column" rowGap={ 4 } mb={ 4 }>
             { contractCreator && (
               <Box>
@@ -224,6 +230,12 @@ const AddressVerificationStepSignature = ({ address, signingMessage, contractCre
               <Box>
                 <chakra.span fontWeight={ 600 }>Contract owner: </chakra.span>
                 <chakra.span>{ contractOwner }</chakra.span>
+              </Box>
+            ) }
+            { contractDeployer && (
+              <Box>
+                <chakra.span fontWeight={ 600 }>Contract deployer: </chakra.span>
+                <chakra.span>{ contractDeployer }</chakra.span>
               </Box>
             ) }
           </Flex>

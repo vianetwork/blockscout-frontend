@@ -2,8 +2,8 @@
 
 import React from 'react';
 
+import type { schemas } from '@blockscout/api-types';
 import type { ClusterChainConfig } from 'src/features/multichain/types/client';
-import type { UserOpsItem } from 'src/features/user-ops/types/api';
 
 import AddressStringOrParam from 'src/slices/address/components/entity/AddressStringOrParam';
 import BlockEntity from 'src/slices/block/components/entity/BlockEntity';
@@ -20,14 +20,15 @@ import NativeCoinValue from 'src/shared/values/entity/NativeCoinValue';
 import { TableCell, TableRow } from 'src/toolkit/chakra/table';
 
 type Props = {
-  item: UserOpsItem;
+  item: schemas['UserOperationInList'];
   isLoading?: boolean;
   showTx: boolean;
   showSender: boolean;
   chainData?: ClusterChainConfig;
+  exchangeRate?: string;
 };
 
-const UserOpsTableItem = ({ item, isLoading, showTx, showSender, chainData }: Props) => {
+const UserOpsTableItem = ({ item, isLoading, showTx, showSender, chainData, exchangeRate }: Props) => {
   return (
     <TableRow>
       { chainData && (
@@ -47,7 +48,7 @@ const UserOpsTableItem = ({ item, isLoading, showTx, showSender, chainData }: Pr
         />
       </TableCell>
       <TableCell verticalAlign="middle">
-        <UserOpStatus status={ item.status } isLoading={ isLoading }/>
+        <UserOpStatus status={ item.status } loading={ isLoading }/>
       </TableCell>
       { showSender && (
         <TableCell verticalAlign="middle">
@@ -78,7 +79,7 @@ const UserOpsTableItem = ({ item, isLoading, showTx, showSender, chainData }: Pr
       </TableCell>
       { !config.slices.tx.hiddenFields?.tx_fee && (
         <TableCell verticalAlign="middle" isNumeric>
-          <NativeCoinValue amount={ item.fee } loading={ isLoading } noSymbol/>
+          <NativeCoinValue amount={ item.fee } loading={ isLoading } exchangeRate={ exchangeRate } layout="vertical" noSymbol/>
         </TableCell>
       ) }
     </TableRow>

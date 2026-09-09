@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: LicenseRef-Blockscout
 
-import { chakra, Box, Flex, Text, VStack, HStack } from '@chakra-ui/react';
+import { chakra, Box, Flex, Text, VStack } from '@chakra-ui/react';
 import { upperFirst } from 'es-toolkit';
 import { route } from 'nextjs-routes';
 import React from 'react';
 
-import type { Block } from 'src/slices/block/types/api';
-
-import useApiQuery from 'src/api/hooks/useApiQuery';
+import type { schemas } from '@blockscout/api-types';
 
 import getChainUtilizationParams from 'src/slices/chain/get-chain-utilization-params';
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 import { useHomeDataContext } from 'src/slices/home/contexts/home-data-context';
-import { useHomeRpcDataContext } from 'src/slices/home/contexts/rpc-data-context';
-import { HOMEPAGE_STATS } from 'src/slices/home/stubs';
 
 import config from 'src/config';
-import ApiDegradationRpcIcon from 'src/shared/api-degradation/ApiDegradationRpcIcon';
 import useIsMobile from 'src/shared/hooks/useIsMobile';
 import useInitialList from 'src/shared/lists/useInitialList';
 
@@ -38,21 +34,13 @@ const LatestBlocks = () => {
     blocksMaxCount = isMobile ? 2 : 3;
   }
   const { blocksQuery } = useHomeDataContext();
-  const initialList = useInitialList<Block>({
+  const initialList = useInitialList<schemas['Block']>({
     data: blocksQuery?.data ?? [],
     idFn: (block) => block.height,
     enabled: Boolean(blocksQuery && !blocksQuery.isPlaceholderData),
   });
 
-  const statsQueryResult = useApiQuery('core:stats', {
-    queryOptions: {
-      refetchOnMount: false,
-      placeholderData: HOMEPAGE_STATS,
-    },
-  });
-
-  const rpcDataContext = useHomeRpcDataContext();
-  const isRpcData = rpcDataContext.isEnabled && !rpcDataContext.isLoading && !rpcDataContext.isError && rpcDataContext.subscriptions.includes('latest-blocks');
+  const statsQueryResult = useStatsQuery();
 
   const content = (() => {
     if (blocksQuery?.isError) {
@@ -86,11 +74,8 @@ const LatestBlocks = () => {
 
   return (
     <Box width={{ base: '100%', lg: '280px' }} flexShrink={ 0 }>
-      <HStack alignItems="center">
-        <Heading level="3">Latest blocks</Heading>
-        { isRpcData && <ApiDegradationRpcIcon/> }
-      </HStack>
-      { statsQueryResult.data?.network_utilization_percentage !== undefined && (
+      <Heading level="3">Latest blocks</Heading>
+      { typeof statsQueryResult.data?.network_utilization_percentage === 'number' && (
         <Skeleton loading={ statsQueryResult.isPlaceholderData } mt={ 2 } display="inline-block" textStyle="sm">
           <Text as="span">
             Network utilization:{ nbsp }

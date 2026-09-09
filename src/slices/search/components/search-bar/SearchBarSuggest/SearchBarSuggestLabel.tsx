@@ -4,15 +4,16 @@ import { Grid, Text, Flex } from '@chakra-ui/react';
 import React from 'react';
 
 import type { ItemsProps } from './types';
-import type { SearchResultLabel } from 'src/slices/search/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { toBech32Address } from 'src/slices/address/utils/bech32';
 
-import HashStringShortenDynamic from 'src/shared/texts/HashStringShortenDynamic';
 import highlightText from 'src/shared/texts/highlight-text';
 import SpriteIcon from 'src/sprite/SpriteIcon';
 
-const SearchBarSuggestLabel = ({ data, isMobile, searchTerm, addressFormat }: ItemsProps<SearchResultLabel>) => {
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
+
+const SearchBarSuggestLabel = ({ data, isMobile, searchTerm, addressFormat }: ItemsProps<schemas['SearchResultLabel']>) => {
   const icon = <SpriteIcon name="publictags" boxSize={ 5 } color="icon.primary"/>;
   const hash = data.filecoin_robust_address || (addressFormat === 'bech32' ? toBech32Address(data.address_hash) : data.address_hash);
 
@@ -33,7 +34,7 @@ const SearchBarSuggestLabel = ({ data, isMobile, searchTerm, addressFormat }: It
       whiteSpace="nowrap"
       color="text.secondary"
     >
-      <HashStringShortenDynamic hash={ hash } noTooltip/>
+      <Truncate value={ hash } tooltip={ false }/>
     </Text>
   );
 

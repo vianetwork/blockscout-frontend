@@ -2,25 +2,30 @@
 
 import React from 'react';
 
+import type { schemas } from '@blockscout/api-types';
 import type { ClusterChainConfig } from 'src/features/multichain/types/client';
-import type { TokenTransfer } from 'src/slices/token-transfer/types/api';
 
 import { AddressHighlightProvider } from 'src/slices/address/contexts/address-highlight';
 
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
+import { getTokenTransferKey } from '../../utils/get-token-transfer-key';
 import TokenTransferTableItem from './TokenTransfersTableItem';
 
 interface Props {
-  items?: Array<TokenTransfer>;
+  items?: Array<schemas['TokenTransfer']>;
   top: number;
   isLoading?: boolean;
   chainData?: ClusterChainConfig;
+  resetKey?: string;
 }
 
-const TokenTransferTable = ({ items, top, isLoading, chainData }: Props) => {
+const TokenTransferTable = ({ items, top, isLoading, chainData, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
+
   return (
     <AddressHighlightProvider>
       <TableRoot minW="950px" tableLayout="auto">
@@ -39,9 +44,9 @@ const TokenTransferTable = ({ items, top, isLoading, chainData }: Props) => {
           </TableRow>
         </TableHeaderSticky>
         <TableBody>
-          { items?.map((item, index) => (
+          { items?.slice(0, renderedItemsNum).map((item, index) => (
             <TokenTransferTableItem
-              key={ item.transaction_hash + item.log_index + (isLoading ? index : '') + (chainData ? chainData.id : '') }
+              key={ getTokenTransferKey(item) + (isLoading ? index : '') + (chainData ? chainData.id : '') }
               item={ item }
               isLoading={ isLoading }
               chainData={ chainData }
@@ -49,6 +54,7 @@ const TokenTransferTable = ({ items, top, isLoading, chainData }: Props) => {
           )) }
         </TableBody>
       </TableRoot>
+      <div ref={ cutRef }/>
     </AddressHighlightProvider>
   );
 };

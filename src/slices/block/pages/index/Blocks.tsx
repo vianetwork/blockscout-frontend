@@ -10,7 +10,7 @@ import PageTitle from 'src/shell/page/title/PageTitle';
 
 import BlocksContent from 'src/slices/block/pages/index/BlocksContent';
 import BlocksTabSlot from 'src/slices/block/pages/index/BlocksTabSlot';
-import { BLOCK } from 'src/slices/block/stubs/block';
+import { BLOCK_ITEM } from 'src/slices/block/stubs/list';
 
 import Flashblocks from 'src/features/flashblocks/pages/index/Flashblocks';
 
@@ -41,7 +41,7 @@ const BlocksPageContent = () => {
     filters: { type: 'block' },
     options: {
       enabled: tab === 'blocks' || !tab,
-      placeholderData: generateListStub<'core:blocks'>(BLOCK, 50, { next_page_params: {
+      placeholderData: generateListStub<'core:blocks'>(BLOCK_ITEM, 50, { next_page_params: {
         block_number: 8988686,
         items_count: 50,
       } }),
@@ -52,7 +52,7 @@ const BlocksPageContent = () => {
     filters: { type: 'reorg' },
     options: {
       enabled: tab === 'reorgs',
-      placeholderData: generateListStub<'core:blocks'>(BLOCK, 50, { next_page_params: {
+      placeholderData: generateListStub<'core:blocks'>(BLOCK_ITEM, 50, { next_page_params: {
         block_number: 8988686,
         items_count: 50,
       } }),
@@ -63,15 +63,14 @@ const BlocksPageContent = () => {
     filters: { type: 'uncle' },
     options: {
       enabled: tab === 'uncles',
-      placeholderData: generateListStub<'core:blocks'>(BLOCK, 50, { next_page_params: {
+      placeholderData: generateListStub<'core:blocks'>(BLOCK_ITEM, 50, { next_page_params: {
         block_number: 8988686,
         items_count: 50,
       } }),
     },
   });
 
-  const flashblocksTabId = flashblocksFeature.isEnabled ? flashblocksFeature.name + 's' : undefined;
-  const isFlashblocksTab = tab === flashblocksTabId && flashblocksTabId !== undefined;
+  const isFlashblocksTab = flashblocksFeature.isEnabled && flashblocksFeature.tabIds.some((id) => id === tab);
 
   const pagination = (() => {
     if (tab === 'reorgs') {
@@ -81,14 +80,14 @@ const BlocksPageContent = () => {
       return unclesQuery.pagination;
     }
     if (isFlashblocksTab) {
-      return null;;
+      return null;
     }
     return blocksQuery.pagination;
   })();
 
   const tabs: Array<TabItemRegular> = [
     { id: 'blocks', title: 'All', component: <BlocksContent type="block" query={ blocksQuery }/> },
-    flashblocksFeature.isEnabled && flashblocksTabId && { id: flashblocksTabId, title: upperFirst(flashblocksFeature.name) + 's', component: <Flashblocks/> },
+    flashblocksFeature.isEnabled && { id: flashblocksFeature.tabIds, title: upperFirst(flashblocksFeature.name) + 's', component: <Flashblocks/> },
     { id: 'reorgs', title: 'Forked', component: <BlocksContent type="reorg" query={ reorgsQuery }/> },
     { id: 'uncles', title: 'Uncles', component: <BlocksContent type="uncle" query={ unclesQuery }/> },
   ].filter(Boolean);

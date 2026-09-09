@@ -5,8 +5,7 @@ import React from 'react';
 
 import type { ChainStatsSection, StatsIntervalIds } from '../../types/client';
 
-import useApiQuery from 'src/api/hooks/useApiQuery';
-
+import useStatsQuery from 'src/slices/chain/stats/useStatsQuery';
 import GasInfoTooltip from 'src/slices/gas/components/GasInfoTooltip';
 
 import ChartWidgetContainerCrossChain from 'src/features/cross-chain-txs/components/ChartWidgetContainerCrossChain';
@@ -14,6 +13,7 @@ import { CROSS_CHAIN_TXS_CHARTS } from 'src/features/cross-chain-txs/utils/chain
 import { useMultichainContext } from 'src/features/multichain/context';
 
 import config from 'src/config';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 import SpriteIcon from 'src/sprite/SpriteIcon';
 
 import { EmptyState } from 'src/toolkit/chakra/empty-state';
@@ -30,10 +30,20 @@ interface Props {
   isError: boolean;
   isLoading: boolean;
   initialFilterQuery: string;
+  filterQuery: string;
   interval: StatsIntervalIds;
 };
 
-const ChainStatsSections = ({ isError, isLoading, displayedSections, interval, initialFilterQuery, sections, sectionId }: Props) => {
+const ChainStatsSections = ({
+  isError,
+  isLoading,
+  displayedSections,
+  interval,
+  initialFilterQuery,
+  filterQuery,
+  sections,
+  sectionId,
+}: Props) => {
   const [ isSomeChartLoadingError, setIsSomeChartLoadingError ] = React.useState(false);
 
   const hasCharts = sections?.some((section) => section.charts.length > 0);
@@ -51,11 +61,13 @@ const ChainStatsSections = ({ isError, isLoading, displayedSections, interval, i
   const { chain } = useMultichainContext() || {};
   const isGasTrackerEnabled = config.features.gasTracker.isEnabled;
 
-  const homeStatsQuery = useApiQuery('core:stats', {
-    queryOptions: {
-      refetchOnMount: false,
-      enabled: isGasTrackerEnabled,
-    },
+  const homeStatsQuery = useStatsQuery({ enabled: isGasTrackerEnabled });
+
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({
+    list: displayedSections,
+    isEnabled: !isLoading,
+    minItemsNum: 3,
+    resetKey: `${ chain?.id ?? '' }:${ sectionId }:${ filterQuery }`,
   });
 
   const handleChartLoadingError = React.useCallback(
@@ -84,7 +96,7 @@ const ChainStatsSections = ({ isError, isLoading, displayedSections, interval, i
 
       <section ref={ sectionRef }>
         {
-          displayedSections?.map((section) => (
+          displayedSections?.slice(0, renderedItemsNum).map((section) => (
             <Box
               key={ section.id }
               mb={{ base: 6, lg: 8 }}
@@ -96,7 +108,7 @@ const ChainStatsSections = ({ isError, isLoading, displayedSections, interval, i
                 <Heading level="2" id={ section.id }>
                   { section.title }
                 </Heading>
-                { isGasTrackerEnabled && section.id === 'gas' && homeStatsQuery.data && homeStatsQuery.data.gas_prices && (
+                { isGasTrackerEnabled && section.id === 'gas' && !homeStatsQuery.isPlaceholderData && homeStatsQuery.data && homeStatsQuery.data.gas_prices && (
                   <GasInfoTooltip data={ homeStatsQuery.data } dataUpdatedAt={ homeStatsQuery.dataUpdatedAt }>
                     <SpriteIcon name="info" boxSize={ 5 } display="block" cursor="pointer" color="icon.secondary" _hover={{ color: 'hover' }}/>
                   </GasInfoTooltip>
@@ -143,6 +155,7 @@ const ChainStatsSections = ({ isError, isLoading, displayedSections, interval, i
           ))
         }
       </section>
+      <Box ref={ cutRef } h={ 0 }/>
     </Box>
   );
 };

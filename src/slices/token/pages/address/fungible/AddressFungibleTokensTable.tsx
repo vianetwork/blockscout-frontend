@@ -2,20 +2,25 @@
 
 import React from 'react';
 
-import type { AddressFungibleTokensItem } from '../types';
+import type { schemas } from '@blockscout/api-types';
+
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
 import AddressFungibleTokensTableItem from './AddressFungibleTokensTableItem';
 
 interface Props {
-  data: Array<AddressFungibleTokensItem>;
+  data: Array<Pick<schemas['TokenBalance'], 'token' | 'value'>>;
   top: number;
   isLoading: boolean;
   hasAdditionalTokenTypes?: boolean;
+  resetKey?: string;
 }
 
-const AddressFungibleTokensTable = ({ data, top, isLoading, hasAdditionalTokenTypes }: Props) => {
+const AddressFungibleTokensTable = ({ data, top, isLoading, hasAdditionalTokenTypes, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: data, isEnabled: !isLoading, resetKey });
+
   return (
     <TableRoot minW="900px">
       <TableHeaderSticky top={ top }>
@@ -28,14 +33,15 @@ const AddressFungibleTokensTable = ({ data, top, isLoading, hasAdditionalTokenTy
         </TableRow>
       </TableHeaderSticky>
       <TableBody>
-        { data.map((item, index) => (
+        { data.slice(0, renderedItemsNum).map((item, index) => (
           <AddressFungibleTokensTableItem
-            key={ item.token.address_hash + (isLoading ? index : '') + (item.chain_values ? Object.keys(item.chain_values).join(',') : '') }
+            key={ (item.token?.address_hash ?? '') + (isLoading ? index : '') }
             { ...item }
             isLoading={ isLoading }
             hasAdditionalTokenTypes={ hasAdditionalTokenTypes }
           />
         )) }
+        <TableRow ref={ cutRef }/>
       </TableBody>
     </TableRoot>
   );

@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: LicenseRef-Blockscout
 
-import { Flex, Grid } from '@chakra-ui/react';
+import { Flex, Grid, type JsxStyleProps } from '@chakra-ui/react';
 import React from 'react';
 
-import type { DecodedInput, DecodedInputParams } from 'src/slices/log/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import AddressEntity from 'src/slices/address/components/entity/AddressEntity';
 
 import CopyToClipboard from 'src/shared/texts/CopyToClipboard';
 
 import { Skeleton } from 'src/toolkit/chakra/skeleton';
-import { TruncatedText } from 'src/toolkit/components/truncation/TruncatedText';
+import { Truncate } from 'src/toolkit/components/truncation/Truncate';
 
-interface Props {
-  data: DecodedInput['parameters'];
+interface Props extends JsxStyleProps {
+  data: schemas['DecodedLogInput']['parameters'] | schemas['DecodedInput']['parameters'];
   isLoading?: boolean;
 }
 
@@ -32,7 +32,13 @@ const HeaderItem = ({ children, isLoading }: { children: React.ReactNode; isLoad
   );
 };
 
-const Row = ({ name, type, indexed, value, isLoading }: DecodedInputParams & { isLoading?: boolean }) => {
+const Row = ({
+  name,
+  type,
+  indexed,
+  value,
+  isLoading,
+}: Omit<schemas['DecodedLogInput']['parameters'][number], 'indexed'> & { indexed?: boolean; isLoading?: boolean }) => {
   const content = (() => {
     if (type === 'address' && typeof value === 'string') {
       return (
@@ -47,7 +53,7 @@ const Row = ({ name, type, indexed, value, isLoading }: DecodedInputParams & { i
       const text = JSON.stringify(value, undefined, 4);
       return (
         <Flex alignItems="flex-start" whiteSpace="normal" wordBreak="break-all">
-          <TruncatedText text={ text } loading={ isLoading }/>
+          <Truncate value={ text } type="end" loading={ isLoading }/>
           <CopyToClipboard text={ text } isLoading={ isLoading }/>
         </Flex>
       );
@@ -55,7 +61,7 @@ const Row = ({ name, type, indexed, value, isLoading }: DecodedInputParams & { i
 
     return (
       <Flex alignItems="flex-start" whiteSpace="normal" wordBreak="break-all">
-        <TruncatedText text={ value } loading={ isLoading }/>
+        <Truncate value={ value } type="end" loading={ isLoading }/>
         <CopyToClipboard text={ value } isLoading={ isLoading }/>
       </Flex>
     );
@@ -63,8 +69,8 @@ const Row = ({ name, type, indexed, value, isLoading }: DecodedInputParams & { i
 
   return (
     <>
-      <TruncatedText text={ name } loading={ isLoading }/>
-      <TruncatedText text={ type } loading={ isLoading }/>
+      <Truncate value={ name } type="end" loading={ isLoading }/>
+      <Truncate value={ type } type="end" loading={ isLoading }/>
       { indexed !== undefined && (
         <Skeleton loading={ isLoading } display="inline-block">{ indexed ? 'true' : 'false' }</Skeleton>
       ) }
@@ -73,8 +79,8 @@ const Row = ({ name, type, indexed, value, isLoading }: DecodedInputParams & { i
   );
 };
 
-const LogDecodedInputDataTable = ({ data, isLoading }: Props) => {
-  const hasIndexed = data.some(({ indexed }) => indexed !== undefined);
+const LogDecodedInputDataTable = ({ data, isLoading, ...rest }: Props) => {
+  const hasIndexed = data.some((item) => 'indexed' in item && typeof item.indexed === 'boolean');
 
   const gridTemplateColumnsBase = hasIndexed ?
     '50px 60px 40px minmax(0, 1fr)' :
@@ -95,6 +101,7 @@ const LogDecodedInputDataTable = ({ data, isLoading }: Props) => {
       rowGap={ 5 }
       borderBottomLeftRadius="md"
       borderBottomRightRadius="md"
+      { ...rest }
     >
       <HeaderItem isLoading={ isLoading }>Name</HeaderItem>
       <HeaderItem isLoading={ isLoading }>Type</HeaderItem>
@@ -102,7 +109,16 @@ const LogDecodedInputDataTable = ({ data, isLoading }: Props) => {
       <HeaderItem isLoading={ isLoading }>Data</HeaderItem>
       { data.map((item) => {
 
-        return <Row key={ item.name } { ...item } isLoading={ isLoading }/>;
+        return (
+          <Row
+            key={ item.name }
+            name={ item.name || 'unnamed' }
+            type={ item.type || '' }
+            value={ item.value || '-' }
+            indexed={ 'indexed' in item ? item.indexed : undefined }
+            isLoading={ isLoading }
+          />
+        );
       }) }
     </Grid>
   );

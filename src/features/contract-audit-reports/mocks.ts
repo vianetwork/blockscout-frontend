@@ -1,6 +1,7 @@
-import type { SmartContractSecurityAudits } from './types/api';
+import type { paths } from '@blockscout/api-types';
 
-export const contractAudits: SmartContractSecurityAudits = {
+export const contractAudits:
+paths['/api/v2/smart-contracts/{address_hash_param}/audit-reports']['get'] = {
   items: [
     {
       audit_company_name: 'OpenZeppelin',
@@ -13,4 +14,5 @@ export const contractAudits: SmartContractSecurityAudits = {
       audit_report_url: 'https://blog.openzeppelin.com/eip-4337-ethereum-account-abstraction-incremental-audit',
     },
   ],
+  next_page_params: null,
 };

@@ -23,7 +23,7 @@ const externalFontsDomains = (() => {
   } catch (error) {}
 })();
 
-export function app(isPrivateMode = false): CspDev.DirectiveDescriptor {
+export function app(isPrivateMode = false, primerScriptHashes: Array<string> = []): CspDev.DirectiveDescriptor {
   return {
     'default-src': [
       // KEY_WORDS.NONE,
@@ -52,6 +52,9 @@ export function app(isPrivateMode = false): CspDev.DirectiveDescriptor {
 
       // github api (used for Stylus contract verification)
       'api.github.com',
+
+      // google fonts
+      'fonts.gstatic.com',
     ].filter(Boolean),
 
     'script-src': [
@@ -67,6 +70,9 @@ export function app(isPrivateMode = false): CspDev.DirectiveDescriptor {
 
       // CapybaraRunner
       '\'sha256-5+YTmTcBwCYdJ8Jetbr6kyjGp0Ry/H7ptpoun6CrSwQ=\'',
+
+      // early-fetch primer scripts (src/server/primedRequests), hashed at startup
+      ...primerScriptHashes,
     ],
 
     'style-src': [
@@ -79,6 +85,9 @@ export function app(isPrivateMode = false): CspDev.DirectiveDescriptor {
       // - and still there is very small damage that can be cause by CSS-based XSS-attacks
       // so we hope we are fine here till the first major incident :)
       KEY_WORDS.UNSAFE_INLINE,
+
+      // google fonts
+      'fonts.googleapis.com',
     ],
 
     'img-src': [
@@ -110,6 +119,12 @@ export function app(isPrivateMode = false): CspDev.DirectiveDescriptor {
       KEY_WORDS.DATA,
       KEY_WORDS.SELF,
       ...MAIN_DOMAINS,
+
+      // google fonts
+      'fonts.gstatic.com',
+      'fonts.googleapis.com',
+
+      // external fonts
       ...(externalFontsDomains || []),
     ],
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import type { TokenTransfer } from 'src/slices/token-transfer/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import * as SocketNewItemsNotice from 'src/api/socket/SocketNewItemsNotice';
 
@@ -11,13 +11,15 @@ import { AddressHighlightProvider } from 'src/slices/address/contexts/address-hi
 import { useMultichainContext } from 'src/features/multichain/context';
 
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
+import { getTokenTransferKey } from '../../utils/get-token-transfer-key';
 import TokenTransferTableItem from './TokenTransferTableItem';
 
 interface Props {
-  data: Array<TokenTransfer>;
+  data: Array<schemas['TokenTransfer']>;
   baseAddress?: string;
   showTxInfo?: boolean;
   top: number;
@@ -26,6 +28,7 @@ interface Props {
   showSocketErrorAlert?: boolean;
   socketInfoNum?: number;
   isLoading?: boolean;
+  resetKey?: string;
 }
 
 const TokenTransferTable = ({
@@ -38,9 +41,16 @@ const TokenTransferTable = ({
   showSocketErrorAlert,
   socketInfoNum,
   isLoading,
+  resetKey,
 }: Props) => {
   const multichainContext = useMultichainContext();
   const chainData = multichainContext?.chain;
+
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({
+    list: data,
+    isEnabled: !isLoading,
+    resetKey,
+  });
 
   return (
     <AddressHighlightProvider>
@@ -70,10 +80,10 @@ const TokenTransferTable = ({
               isLoading={ isLoading }
             />
           ) }
-          { data.map((item, index) => (
+          { data.slice(0, renderedItemsNum).map((item, index) => (
             <TokenTransferTableItem
-              key={ item.transaction_hash + item.block_hash + item.log_index + (isLoading ? index : '') }
-              { ...item }
+              key={ getTokenTransferKey(item) + (isLoading ? index : '') }
+              data={ item }
               baseAddress={ baseAddress }
               showTxInfo={ showTxInfo }
               enableTimeIncrement={ enableTimeIncrement }
@@ -83,6 +93,7 @@ const TokenTransferTable = ({
           )) }
         </TableBody>
       </TableRoot>
+      <div ref={ cutRef }/>
     </AddressHighlightProvider>
   );
 };

@@ -21,7 +21,7 @@ const rollupFeature = config.features.rollup;
 type Props = { item: ZkSyncBatchesItem; isLoading?: boolean };
 
 const ZkSyncTxnBatchesListItem = ({ item, isLoading }: Props) => {
-  if (!rollupFeature.isEnabled || rollupFeature.type !== 'zkSync') {
+  if (!rollupFeature.isEnabled || (rollupFeature.type !== 'zkSync' && rollupFeature.type !== 'via')) {
     return null;
   }
 

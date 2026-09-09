@@ -2,22 +2,26 @@
 
 import React from 'react';
 
-import type { CeloEpochListItem } from 'src/features/chain-variants/celo/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import config from 'src/config';
 import TimeFormatToggle from 'src/shared/date-and-time/TimeFormatToggle';
+import useLazyRenderedList from 'src/shared/lists/useLazyRenderedList';
 
 import { TableBody, TableColumnHeader, TableHeaderSticky, TableRoot, TableRow } from 'src/toolkit/chakra/table';
 
 import EpochsTableItem from './EpochsTableItem';
 
 interface Props {
-  items: Array<CeloEpochListItem>;
+  items: Array<schemas['CeloEpoch']>;
   isLoading?: boolean;
   top: number;
+  resetKey?: string;
 };
 
-const EpochsTable = ({ items, isLoading, top }: Props) => {
+const EpochsTable = ({ items, isLoading, top, resetKey }: Props) => {
+  const { cutRef, renderedItemsNum } = useLazyRenderedList({ list: items, isEnabled: !isLoading, resetKey });
+
   return (
     <TableRoot minW="1100px">
       <TableHeaderSticky top={ top }>
@@ -34,7 +38,7 @@ const EpochsTable = ({ items, isLoading, top }: Props) => {
         </TableRow>
       </TableHeaderSticky>
       <TableBody>
-        { items.map((item, index) => {
+        { items.slice(0, renderedItemsNum).map((item, index) => {
           return (
             <EpochsTableItem
               key={ item.number + (isLoading ? String(index) : '') }
@@ -43,6 +47,7 @@ const EpochsTable = ({ items, isLoading, top }: Props) => {
             />
           );
         }) }
+        <TableRow ref={ cutRef }/>
       </TableBody>
     </TableRoot>
   );

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LicenseRef-Blockscout
 
 import type { Fields } from './types';
-import type { TokenInfoApplication } from 'src/features/account/types/api';
+import type * as adminRs from '@blockscout/admin-rs-types';
 
-export function getFormDefaultValues(address: string, tokenName: string, application: TokenInfoApplication | undefined): Partial<Fields> {
+export function getFormDefaultValues(address: string, tokenName: string, application: adminRs.TokenInfoSubmission | undefined): Partial<Fields> {
   if (!application) {
     return { address, token_name: tokenName };
   }
@@ -35,10 +35,11 @@ export function getFormDefaultValues(address: string, tokenName: string, applica
     medium: application.medium || '',
     reddit: application.reddit || '',
     comment: application.comment || '',
+    payment_tx: application.paymentTx || '',
   };
 }
 
-export function prepareRequestBody(data: Fields): Omit<TokenInfoApplication, 'id' | 'status' | 'updatedAt'> {
+export function prepareRequestBody(data: Fields): Omit<adminRs.TokenInfoSubmission, 'id' | 'status' | 'updatedAt'> {
   return {
     coinGeckoTicker: data.ticker_coin_gecko,
     coinMarketCapTicker: data.ticker_coin_market_cap,
@@ -65,5 +66,6 @@ export function prepareRequestBody(data: Fields): Omit<TokenInfoApplication, 'id
     tokenAddress: data.address,
     twitter: data.twitter,
     comment: data.comment,
+    paymentTx: data.payment_tx || undefined,
   };
 }

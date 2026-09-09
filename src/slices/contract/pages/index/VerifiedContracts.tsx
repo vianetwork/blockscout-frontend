@@ -12,7 +12,6 @@ import VerifiedContractsFilter from 'src/slices/contract/pages/index/VerifiedCon
 import VerifiedContractsList from 'src/slices/contract/pages/index/VerifiedContractsList';
 import VerifiedContractsTable from 'src/slices/contract/pages/index/VerifiedContractsTable';
 
-import config from 'src/config';
 import useIsMobile from 'src/shared/hooks/useIsMobile';
 import DataList from 'src/shared/lists/DataList';
 import Pagination from 'src/shared/pagination/Pagination';
@@ -82,20 +81,17 @@ const VerifiedContracts = () => {
   const content = data?.items ? (
     <>
       <Box hideFrom="lg">
-        <VerifiedContractsList data={ data.items } isLoading={ isPlaceholderData }/>
+        <VerifiedContractsList data={ data.items } isLoading={ isPlaceholderData } resetKey={ query.queryHash }/>
       </Box>
       <Box hideBelow="lg">
-        <VerifiedContractsTable data={ data.items } sort={ sort } setSorting={ onSortChange } isLoading={ isPlaceholderData }/>
+        <VerifiedContractsTable data={ data.items } sort={ sort } setSorting={ onSortChange } isLoading={ isPlaceholderData } resetKey={ query.queryHash }/>
       </Box>
     </>
   ) : null;
 
   return (
     <Box>
-      <PageTitle
-        title={ config.metadata.seo.enhancedDataEnabled ? `Verified ${ config.chain.name } contracts` : 'Verified contracts' }
-        withTextAd
-      />
+      <PageTitle title="Verified contracts" withTextAd/>
       <VerifiedContractsCounters/>
       <DataList
         isError={ isError }

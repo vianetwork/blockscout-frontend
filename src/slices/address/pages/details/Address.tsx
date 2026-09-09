@@ -48,7 +48,6 @@ import AlternativeExplorers from 'src/features/alternative-explorers/components/
 import AddressDeposits from 'src/features/chain-variants/beacon-chain/pages/address/AddressDeposits';
 import AddressWithdrawals from 'src/features/chain-variants/beacon-chain/pages/address/AddressWithdrawals';
 import AddressEpochRewards from 'src/features/chain-variants/celo/pages/address/AddressEpochRewards';
-import AddressMud from 'src/features/chain-variants/mud/pages/address/AddressMud';
 import AddressMultichainInfoButton from 'src/features/multichain-button/pages/address/AddressMultichainInfoButton';
 import { useAddressClusters } from 'src/features/name-services/clusters/hooks/useAddressClusters';
 import AddressClusters from 'src/features/name-services/clusters/pages/address/AddressClusters';
@@ -104,7 +103,6 @@ const AddressPageContent = () => {
 
   const countersQuery = useAddressCountersQuery({
     hash,
-    isLoading: addressQuery.isPlaceholderData,
     isDegradedData: addressQuery.isDegradedData,
   });
 
@@ -113,14 +111,6 @@ const AddressPageContent = () => {
     queryOptions: {
       enabled: areQueriesEnabled && Boolean(hash) && config.features.userOps.isEnabled,
       placeholderData: USER_OPS_ACCOUNT,
-    },
-  });
-
-  const mudTablesCountQuery = useApiQuery('core:mud_tables_count', {
-    pathParams: { hash },
-    queryOptions: {
-      enabled: config.features.mudFramework.isEnabled && areQueriesEnabled && Boolean(hash),
-      placeholderData: 10,
     },
   });
 
@@ -155,8 +145,7 @@ const AddressPageContent = () => {
     isLoading ||
     addressTabsCountersQuery.isPlaceholderData ||
     (address3rdPartyWidgets.isEnabled && address3rdPartyWidgets.configQuery.isPlaceholderData) ||
-    (config.features.userOps.isEnabled && userOpsAccountQuery.isPlaceholderData) ||
-    (config.features.mudFramework.isEnabled && mudTablesCountQuery.isPlaceholderData);
+    (config.features.userOps.isEnabled && userOpsAccountQuery.isPlaceholderData);
 
   const handleFetchedBytecodeMessage = React.useCallback(() => {
     addressQuery.refetch();
@@ -208,17 +197,10 @@ const AddressPageContent = () => {
           <Contract
             addressData={ addressQuery.data }
             isLoading={ isTabsLoading }
-            hasMudTab={ Boolean(config.features.mudFramework.isEnabled && mudTablesCountQuery.data && mudTablesCountQuery.data > 0) }
           />
         ),
         subTabs: CONTRACT_TAB_IDS,
       } : undefined,
-      config.features.mudFramework.isEnabled && mudTablesCountQuery.data && mudTablesCountQuery.data > 0 && {
-        id: 'mud',
-        title: 'MUD',
-        count: mudTablesCountQuery.data,
-        component: <AddressMud shouldRender={ !isTabsLoading } isQueryEnabled={ areQueriesEnabled }/>,
-      },
       {
         id: 'txs',
         title: 'Transactions',
@@ -326,7 +308,6 @@ const AddressPageContent = () => {
     userOpsAccountQuery.data,
     isTabsLoading,
     areQueriesEnabled,
-    mudTablesCountQuery.data,
     address3rdPartyWidgets,
     addressType,
   ]);
@@ -384,9 +365,6 @@ const AddressPageContent = () => {
       config.features.userOps.isEnabled && userOpsAccountQuery.data ?
         { slug: 'user_ops_acc', name: 'Smart contract wallet', tagType: 'custom' as const, ordinal: PREDEFINED_TAG_PRIORITY } :
         undefined,
-      config.features.mudFramework.isEnabled && mudTablesCountQuery.data ?
-        { slug: 'mud', name: 'MUD World', tagType: 'custom' as const, ordinal: PREDEFINED_TAG_PRIORITY } :
-        undefined,
       ...formatAccountTags(addressQuery.data),
       ...(addressMetadataQuery.data?.addresses?.[hash.toLowerCase()]?.tags.filter(tag => tag.tagType !== 'note') || []),
       !addressQuery.data?.is_contract && xScoreFeature.isEnabled && xStarQuery.data?.data.level ?
@@ -410,7 +388,6 @@ const AddressPageContent = () => {
     hash,
     isSafeAddress,
     userOpsAccountQuery.data,
-    mudTablesCountQuery.data,
     usernameApiTag,
     xStarQuery.data?.data,
   ]);
@@ -464,7 +441,7 @@ const AddressPageContent = () => {
           hash: checkSummedHash,
           name: '',
           ens_domain_name: '',
-          implementations: null,
+          implementations: [],
         }}
         isLoading={ isLoading }
         variant="subheading"

@@ -139,11 +139,6 @@ module.exports = {
   ],
   transform: async({ lastmod, ...config }, path) => {
     switch (path) {
-      case '/mud-worlds':
-        if (process.env.NEXT_PUBLIC_HAS_MUD_FRAMEWORK !== 'true') {
-          return null;
-        }
-        break;
       case '/batches':
       case '/deposits':
         if (!process.env.NEXT_PUBLIC_ROLLUP_TYPE && (process.env.NEXT_PUBLIC_HAS_BEACON_CHAIN !== 'true' || process.env.NEXT_PUBLIC_BEACON_CHAIN_WITHDRAWALS_ONLY === 'true')) {
@@ -201,7 +196,11 @@ module.exports = {
         }
         break;
       case '/api-docs':
-        if (process.env.NEXT_PUBLIC_API_DOCS_TABS === '[]') {
+        // on chains served by the Pro API the page only exists when tabs are configured explicitly
+        if (
+          process.env.NEXT_PUBLIC_API_DOCS_TABS === '[]' ||
+          (process.env.NEXT_PUBLIC_PRO_API_SUPPORTED === 'true' && !process.env.NEXT_PUBLIC_API_DOCS_TABS)
+        ) {
           return null;
         }
         break;

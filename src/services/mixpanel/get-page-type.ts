@@ -60,7 +60,6 @@ export const PAGE_TYPE_DICT: Record<Route['pathname'], string> = {
   '/epochs': 'Epochs',
   '/epochs/[number]': 'Epoch details',
   '/gas-tracker': 'Gas tracker',
-  '/mud-worlds': 'MUD worlds',
   '/token-transfers': 'Token transfers',
   '/advanced-filter': 'Advanced filter',
   '/pools': 'DEX pools',
@@ -69,7 +68,7 @@ export const PAGE_TYPE_DICT: Record<Route['pathname'], string> = {
   '/operations': 'Operations',
   '/operation/[id]': 'Operation details',
   '/cc/tx/[hash]': 'Cross-chain transaction details',
-  '/cross-chain-tx/[id]': 'Cross-chain transaction details',
+  '/bridge/[bridgeId]/cross-chain-tx/[id]': 'Cross-chain transaction details',
   '/ictt-users': 'ICTT users',
 
   // multichain routes

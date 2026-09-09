@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-Blockscout
 
-import type { AddressesItem } from 'src/slices/address/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 export interface AddressMetadataInfo {
   addresses: Record<string, {
@@ -59,29 +59,11 @@ export interface PublicTagTypesResponse {
 }
 
 export interface AddressesMetadataSearchResult {
-  items: Array<AddressesItem>;
+  items: Array<schemas['TopAddress']>;
   next_page_params: null;
 }
 
 export interface AddressesMetadataSearchFilters {
   slug: string;
   tag_type: string;
-}
-
-export interface SearchResultMetadataTag {
-  type: 'metadata_tag';
-  name: string | null;
-  address_hash: string;
-  is_smart_contract_verified: boolean;
-  is_smart_contract_address: boolean;
-  certified?: true;
-  filecoin_robust_address?: string | null;
-  url?: string;
-  ens_info?: {
-    address_hash: string;
-    expiry_date?: string;
-    name: string;
-    names_count: number;
-  } | null;
-  metadata: AddressMetadataTagApi;
 }

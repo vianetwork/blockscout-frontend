@@ -3,9 +3,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 
+import type { paths, schemas } from '@blockscout/api-types';
 import type { SocketMessage } from 'src/api/socket/types';
-import type { AddressTokenTransferResponse } from 'src/slices/address/types/api';
-import type { TokenTransfer } from 'src/slices/token-transfer/types/api';
 
 import { getResourceKey } from 'src/api/hooks/useApiQuery';
 import useSocketChannel from 'src/api/socket/useSocketChannel';
@@ -20,7 +19,7 @@ import * as cookies from 'src/shared/storage/cookies';
 
 import type { Filters } from './useAddressTokenTransfersQuery';
 
-const matchFilters = (filters: Filters, tokenTransfer: TokenTransfer, address?: string, shouldHideScamTokens?: boolean) => {
+const matchFilters = (filters: Filters, tokenTransfer: schemas['TokenTransfer'], address?: string, shouldHideScamTokens?: boolean) => {
   if (shouldHideScamTokens && tokenTransfer.token?.reputation === 'scam') {
     return false;
   }
@@ -34,7 +33,7 @@ const matchFilters = (filters: Filters, tokenTransfer: TokenTransfer, address?: 
     }
   }
   if (filters.type && filters.type.length) {
-    if (!tokenTransfer.token || !filters.type.includes(tokenTransfer.token.type)) {
+    if (!tokenTransfer.token || !(tokenTransfer.token.type && filters.type.includes(tokenTransfer.token.type))) {
       return false;
     }
   }
@@ -43,6 +42,8 @@ const matchFilters = (filters: Filters, tokenTransfer: TokenTransfer, address?: 
 };
 
 const OVERLOAD_COUNT = 75;
+
+type AddressTokenTransferResponse = paths['/api/v2/addresses/{address_hash_param}/token-transfers']['get'];
 
 interface Props {
   filters: Filters;
@@ -65,7 +66,7 @@ export default function useAddressTokenTransfersSocket({ filters, addressHash, d
   const handleNewSocketMessage: SocketMessage.AddressTokenTransfer['handler'] = React.useCallback((payload) => {
     setShowSocketAlert(false);
 
-    const newItems: Array<TokenTransfer> = [];
+    const newItems: Array<schemas['TokenTransfer']> = [];
     let newCount = 0;
 
     payload.token_transfers.forEach(transfer => {

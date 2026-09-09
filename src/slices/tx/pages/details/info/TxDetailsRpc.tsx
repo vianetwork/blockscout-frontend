@@ -5,15 +5,15 @@ import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import type { Chain, GetBlockReturnType, GetTransactionReturnType, TransactionReceipt } from 'viem';
 
-import type { Transaction } from 'src/slices/tx/types/api';
+import type { schemas } from '@blockscout/api-types';
 
 import { GET_BLOCK } from 'src/slices/block/stubs/rpc';
 import TestnetWarning from 'src/slices/chain/TestnetWarning';
 import type { TxQuery } from 'src/slices/tx/hooks/useTxQuery';
 import { GET_TRANSACTION, GET_TRANSACTION_RECEIPT, GET_TRANSACTION_CONFIRMATIONS } from 'src/slices/tx/stubs/rpc';
-import formatRpcData from 'src/slices/tx/utils/format-rpc-data';
+import { formatTxDetailsRpcData } from 'src/slices/tx/utils/format-rpc-data';
 
-import { publicClient } from 'src/features/connect-wallet/utils/public-client';
+import { getPublicClient } from 'src/features/connect-wallet/utils/public-client';
 
 import ApiFetchAlert from 'src/shared/alerts/ApiFetchAlert';
 import ApiDegradationAlert from 'src/shared/api-degradation/ApiDegradationAlert';
@@ -40,9 +40,10 @@ const TxDetailsRpc = ({ hash, txQuery }: Props) => {
 
   const [ originalError ] = React.useState(txQuery.error);
 
-  const query = useQuery<RpcResponseType, unknown, Transaction | null>({
+  const query = useQuery<RpcResponseType, unknown, schemas['TransactionResponse'] | null>({
     queryKey: [ 'RPC', 'tx', { hash } ],
     queryFn: async() => {
+      const publicClient = await getPublicClient();
       if (!publicClient) {
         throw new Error('No public RPC client');
       }
@@ -66,9 +67,9 @@ const TxDetailsRpc = ({ hash, txQuery }: Props) => {
       ];
     },
     select: (response) => {
-      const [ tx, txReceipt, txConfirmations, block ] = response;
+      const [ tx, receipt, confirmations, block ] = response;
 
-      return formatRpcData(tx, txReceipt, txConfirmations, block);
+      return formatTxDetailsRpcData({ tx, receipt, confirmations, block });
     },
     placeholderData: [
       GET_TRANSACTION,

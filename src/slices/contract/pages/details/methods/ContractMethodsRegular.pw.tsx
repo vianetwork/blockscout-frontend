@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Abi, AbiFunction } from 'viem';
 
-import * as addressMock from 'src/slices/address/mocks/address';
+import * as addressParamMock from 'src/slices/address/mocks/address-param';
 import * as methodsMock from 'src/slices/contract/mocks/methods';
 
 import { test, expect } from 'playwright/lib';
@@ -9,7 +9,7 @@ import * as pwConfig from 'playwright/utils/config';
 
 import ContractMethodsRegular from './ContractMethodsRegular';
 
-const addressHash = addressMock.hash;
+const addressHash = addressParamMock.hash;
 
 test('can read method', async({ render, mockContractReadResponse }) => {
   const hooksConfig = {
@@ -46,7 +46,7 @@ test('can simulate method', async({ render, mockContractReadResponse }) => {
     address: addressHash,
     args: [ ADDRESS, AMOUNT ],
     rpcMethod: 'eth_estimateGas',
-    result: 42000,
+    result: '0xA410',
     noResultEncoding: true,
   });
   await mockContractReadResponse({

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import type { TokenTransfer } from 'src/slices/token-transfer/types/api';
+import type { schemas } from '@blockscout/api-types';
 import type { TokenType } from 'src/slices/token/types/api';
 
 import { ACTION_BAR_HEIGHT_DESKTOP } from 'src/shell/page/action-bar/ActionBar';
@@ -32,7 +32,7 @@ import TxTokenTransferLocal from './TxTokenTransferLocal';
 
 interface Props {
   txQuery: TxQuery;
-  tokenTransferFilter?: (data: TokenTransfer) => boolean;
+  tokenTransferFilter?: (data: schemas['TokenTransfer']) => boolean;
   noCrossChain?: boolean;
 }
 
@@ -43,6 +43,7 @@ const TxTokenTransfer = ({ txQuery, tokenTransferFilter, noCrossChain }: Props) 
   const tab = getQueryParamString(router.query.tab);
 
   const areQueriesEnabled = !txQuery.isPlaceholderData && Boolean(txQuery.data?.status && txQuery.data?.hash);
+  const chainConfig = multichainContext?.chain?.app_config ?? config;
 
   const [ typeFilter, setTypeFilter ] = React.useState<Array<TokenType>>(
     getTokenFilterValue(router.query.type, multichainContext?.chain?.app_config) || [],
@@ -60,17 +61,17 @@ const TxTokenTransfer = ({ txQuery, tokenTransferFilter, noCrossChain }: Props) 
 
   const crossChainQuery = useTxCrossChainTransfersQuery({
     hash: String(txQuery.data?.hash),
-    enabled: areQueriesEnabled && !noCrossChain,
+    enabled: areQueriesEnabled && !noCrossChain && chainConfig.features.crossChainTxs.isEnabled,
   });
 
   const hasCrossChainTab =
-    config.features.crossChainTxs.isEnabled &&
+    chainConfig.features.crossChainTxs.isEnabled &&
     Boolean(!crossChainQuery.isPlaceholderData && crossChainQuery.data?.items.length) &&
     !noCrossChain;
   const isLocalTab = tab === 'token_transfers' || (tab !== 'token_transfers_cross_chain' && !hasCrossChainTab);
   const isTabsLoading = useIsInitialLoading(
     localQuery.isPlaceholderData ||
-    (config.features.crossChainTxs.isEnabled && crossChainQuery.isPlaceholderData && !noCrossChain),
+    (chainConfig.features.crossChainTxs.isEnabled && crossChainQuery.isPlaceholderData && !noCrossChain),
   );
 
   const tabs = [

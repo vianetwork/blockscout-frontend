@@ -3,28 +3,27 @@
 import * as descriptors from './policies';
 import { makePolicyString, mergeDescriptors } from './utils';
 
-function generateCspPolicy(isPrivateMode = false, nonce?: string) {
+function generateCspPolicy(isPrivateMode = false, nonce?: string, primerScriptHashes?: Array<string>) {
   const policyDescriptor = mergeDescriptors(
-    descriptors.app(isPrivateMode),
-    // Exclude tracking/analytics sources in private mode
-    isPrivateMode ? {} : descriptors.ad(nonce),
-    isPrivateMode ? {} : descriptors.connectWallet(),
-    descriptors.cloudFlare(),
+    descriptors.addressProfileApi(),
+    descriptors.app(isPrivateMode, primerScriptHashes),
+    descriptors.ads(isPrivateMode, nonce),
+    descriptors.connectWallet(isPrivateMode),
+    descriptors.cloudFlare(isPrivateMode),
     descriptors.flashblocks(),
-    isPrivateMode ? {} : descriptors.googleAnalytics(),
-    descriptors.googleFonts(),
-    descriptors.googleReCaptcha(),
-    isPrivateMode ? {} : descriptors.growthBook(),
-    descriptors.helia(),
-    isPrivateMode ? {} : descriptors.marketplace(),
+    descriptors.googleAnalytics(isPrivateMode),
+    descriptors.growthbook(isPrivateMode),
+    descriptors.marketplace(isPrivateMode),
     descriptors.megaEth(),
-    isPrivateMode ? {} : descriptors.mixpanel(),
+    descriptors.mixpanel(isPrivateMode),
     descriptors.monaco(),
     descriptors.multichain(),
-    isPrivateMode ? {} : descriptors.rollbar(),
+    descriptors.rollbar(isPrivateMode),
+    descriptors.usercentrics(isPrivateMode),
     descriptors.rollup(),
+    descriptors.reCaptcha(isPrivateMode),
     descriptors.safe(),
-    descriptors.usernameApi(),
+    descriptors.verifiedFetch(),
     descriptors.zetachain(),
   );
 
