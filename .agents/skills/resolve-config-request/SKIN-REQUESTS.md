@@ -10,7 +10,7 @@ Non-skin variables on the same request wait and ride in the phase-2 DevOps messa
 
 ## Drift
 
-The `configs/hero-banner/` and `configs/color-themes/` JSON files are the editable source of truth for variables whose values are **inlined** into the env var. They are not fetched at runtime. To change one colour, read the current file, patch it, and regenerate the string.
+The [configs/hero-banner/](https://github.com/blockscout/frontend-configs/tree/main/configs/hero-banner) and [configs/color-themes/](https://github.com/blockscout/frontend-configs/tree/main/configs/color-themes) JSON files in the separate `frontend-configs` repository are the editable source of truth for variables whose values are **inlined** into the env var. They are not fetched at runtime. To change one colour, read the current file, patch it, and regenerate the string.
 
 Emitting `NEXT_PUBLIC_HOMEPAGE_HERO_BANNER_CONFIG` or `NEXT_PUBLIC_COLOR_THEME_OVERRIDES` without updating the file in the same change lets the two drift: the next colour tweak regenerates from a stale base and silently reverts everything since. Those variables always take this branch, even for a one-colour change.
 
@@ -39,7 +39,7 @@ Hero banner values are `Array<string | undefined>` with index `[0]` = light, `[1
 
 Optimise SVGs with the configs repo's `svgo.config.cjs` — it strips dimensions, keeps `viewBox`, and applies `prefixIds` per file so light and dark variants do not collide. Favicon: square PNG, ≥180×180. OG image: 1200×600.
 
-Directories: `configs/network-logos/`, `configs/network-icons/`, `configs/favicons/`, `configs/og-images/`, `configs/hero-banner/`, `configs/network-skins/` (hero backgrounds), `configs/color-themes/`, `configs/homepage-highlights/`. Navigation promo banner is inlined and has no file in this repo.
+Directories in the separate `frontend-configs` repository: [configs/network-logos/](https://github.com/blockscout/frontend-configs/tree/main/configs/network-logos), [configs/network-icons/](https://github.com/blockscout/frontend-configs/tree/main/configs/network-icons), [configs/favicons/](https://github.com/blockscout/frontend-configs/tree/main/configs/favicons), [configs/og-images/](https://github.com/blockscout/frontend-configs/tree/main/configs/og-images), [configs/hero-banner/](https://github.com/blockscout/frontend-configs/tree/main/configs/hero-banner), [configs/network-skins/](https://github.com/blockscout/frontend-configs/tree/main/configs/network-skins) (hero backgrounds), [configs/color-themes/](https://github.com/blockscout/frontend-configs/tree/main/configs/color-themes), [configs/homepage-highlights/](https://github.com/blockscout/frontend-configs/tree/main/configs/homepage-highlights). Navigation promo banner is inlined and has no file in that repository.
 
 While the configs PR is open, asset URLs are the **PR branch's** raw GitHub URLs, not `main`.
 

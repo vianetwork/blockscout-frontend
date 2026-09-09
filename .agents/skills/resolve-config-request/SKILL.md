@@ -116,15 +116,17 @@ Checkout: a workspace folder named `frontend-configs` or `blockscout_frontend_co
 
 Follow the `check-github-cli` skill. Confirm with the user before the commit and the PR — this PR is merged to `main`, where live instances fetch from. (Skin phase 1 is the exception: its PR stays unmerged for review, so it needs no confirmation.) The `create-pr` skill's frontend template, ENVs label, and issue-from-branch steps do not apply.
 
+The directories below belong to the separate [frontend-configs repository](https://github.com/blockscout/frontend-configs), not this frontend checkout.
+
 | Directory | Variable |
 | --- | --- |
-| `configs/featured-networks/` | `NEXT_PUBLIC_FEATURED_NETWORKS` |
-| `configs/footer-links/` (+ `configs/footer-icons/`) | `NEXT_PUBLIC_FOOTER_LINKS` |
-| `configs/marketplace/` and siblings (`marketplace-categories/`, `marketplace-subgraph-links/`, `marketplace-logos/`, `marketplace-security-reports/`) | `NEXT_PUBLIC_MARKETPLACE_CONFIG_URL`, `NEXT_PUBLIC_MARKETPLACE_CATEGORIES_URL`, `NEXT_PUBLIC_MARKETPLACE_GRAPH_LINKS_URL` |
-| `configs/widgets/` | `NEXT_PUBLIC_ADDRESS_3RD_PARTY_WIDGETS_CONFIG_URL` |
-| `configs/cross-chain/` | `NEXT_PUBLIC_ZETACHAIN_SERVICE_CHAINS_CONFIG_URL` |
+| [configs/featured-networks/](https://github.com/blockscout/frontend-configs/tree/main/configs/featured-networks) | `NEXT_PUBLIC_FEATURED_NETWORKS` |
+| [configs/footer-links/](https://github.com/blockscout/frontend-configs/tree/main/configs/footer-links) (+ [configs/footer-icons/](https://github.com/blockscout/frontend-configs/tree/main/configs/footer-icons)) | `NEXT_PUBLIC_FOOTER_LINKS` |
+| [configs/marketplace/](https://github.com/blockscout/frontend-configs/tree/main/configs/marketplace) and siblings (`marketplace-categories/`, `marketplace-subgraph-links/`, `marketplace-logos/`, `marketplace-security-reports/`) | `NEXT_PUBLIC_MARKETPLACE_CONFIG_URL`, `NEXT_PUBLIC_MARKETPLACE_CATEGORIES_URL`, `NEXT_PUBLIC_MARKETPLACE_GRAPH_LINKS_URL` |
+| [configs/widgets/](https://github.com/blockscout/frontend-configs/tree/main/configs/widgets) | `NEXT_PUBLIC_ADDRESS_3RD_PARTY_WIDGETS_CONFIG_URL` |
+| [configs/cross-chain/](https://github.com/blockscout/frontend-configs/tree/main/configs/cross-chain) | `NEXT_PUBLIC_ZETACHAIN_SERVICE_CHAINS_CONFIG_URL` |
 
-Hosted icons for **inlined** lists (the env holds the JSON; the file is the URL inside it): `configs/ide-icons/` → `NEXT_PUBLIC_CONTRACT_CODE_IDES`; `configs/nft-marketplace-logos/` → `NEXT_PUBLIC_VIEWS_NFT_MARKETPLACES`; `configs/multichain-balance/` → `NEXT_PUBLIC_MULTICHAIN_BALANCE_PROVIDER_CONFIG`.
+Hosted icons for **inlined** lists (the env holds the JSON; the file is the URL inside it): [configs/ide-icons/](https://github.com/blockscout/frontend-configs/tree/main/configs/ide-icons) → `NEXT_PUBLIC_CONTRACT_CODE_IDES`; [configs/nft-marketplace-logos/](https://github.com/blockscout/frontend-configs/tree/main/configs/nft-marketplace-logos) → `NEXT_PUBLIC_VIEWS_NFT_MARKETPLACES`; [configs/multichain-balance/](https://github.com/blockscout/frontend-configs/tree/main/configs/multichain-balance) → `NEXT_PUBLIC_MULTICHAIN_BALANCE_PROVIDER_CONFIG`.
 
 After merge to `main`, confirm each raw URL returns 200. If the instance already has that URL, the DevOps ask is a restart to re-fetch — no new `KEY=value`. If the URL is new, or the value is inlined, it goes in the block as usual.
 
